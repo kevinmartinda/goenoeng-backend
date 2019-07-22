@@ -4,6 +4,10 @@ const logger = require('morgan')
 const bodyParser = require('body-parser')
 const helmet = require('helmet')
 
+const { cloudinaryConfig } = require('./config/cloudinary.config')
+
+const mountainsRoute = require('./routes/mountains.route')
+
 const Joi = require('@hapi/joi')
 Joi.objectId = require('joi-objectid')(Joi)
 
@@ -13,6 +17,7 @@ app.use(logger('dev'))
 app.use(helmet.xssFilter())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+app.use('*', cloudinaryConfig)
 
 const config = require('config')
 
@@ -39,6 +44,8 @@ mongoose.connect(process.env.MONGO_URL, {
 app.get('/', (req, res) => {
   res.json({ message: 'server running' })
 })
+
+app.use('/mountains', mountainsRoute)
 
 const port = process.env.PORT || 3000
 app.listen(port, () => {
