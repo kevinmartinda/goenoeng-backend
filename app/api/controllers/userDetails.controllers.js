@@ -44,9 +44,9 @@ exports.updateProfile = async (req, res) => {
 
 	// res.json(req.body);
 	if(req.files && req.files.length > 0) {
-        images = await _doMultipleUpload(req)
-    	req.body.image_profil = images[0];
-    }
+    images = await _doMultipleUpload(req)
+    req.body.image_profil = images[0];
+  }
 
 	await userDetailModel.findOneAndUpdate({user}, req.body)
 	.then(data => {
