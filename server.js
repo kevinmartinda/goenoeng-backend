@@ -7,6 +7,9 @@ const helmet = require('helmet')
 const Joi = require('@hapi/joi')
 Joi.objectId = require('joi-objectid')(Joi)
 
+// routes
+const usersRoutes = require('./routes/users.routes')
+
 const app = express()
 
 app.use(logger('dev'))
@@ -39,6 +42,7 @@ mongoose.connect(process.env.MONGO_URL, {
 app.get('/', (req, res) => {
   res.json({ message: 'server running' })
 })
+app.use('/users', usersRoutes)
 
 const port = process.env.PORT || 3000
 app.listen(port, () => {
