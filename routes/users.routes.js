@@ -9,6 +9,6 @@ const auth = require('../app/api/middleware/auth')
 router.post('/register', userController.signup)
 router.post('/auth/:level', userController.login)
 //router.post('/forgetpassword', userController.forgetPassword)
-//router.patch('/changepassword/:level', auth, userController.changePassword)
+router.patch('/changepassword/:level', auth, userController.changePassword)
 
 module.exports = router

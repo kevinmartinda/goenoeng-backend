@@ -9,6 +9,9 @@ Joi.objectId = require('joi-objectid')(Joi)
 
 // routes
 const usersRoutes = require('./routes/users.routes')
+const userDetailsRoutes = require('./routes/userDetails.routes')
+
+const { cloudinaryConfig } = require('./config/cloudinary.config')
 
 const app = express()
 
@@ -16,6 +19,7 @@ app.use(logger('dev'))
 app.use(helmet.xssFilter())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+app.use('*', cloudinaryConfig)
 
 const config = require('config')
 
@@ -43,6 +47,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'server running' })
 })
 app.use('/users', usersRoutes)
+app.use('/users', userDetailsRoutes)
 
 const port = process.env.PORT || 3000
 app.listen(port, () => {
