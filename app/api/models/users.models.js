@@ -50,7 +50,7 @@ UserSchema.pre('save', function(next) {
 })
 
 UserSchema.methods.generateAuthToken = function() {
-	const token = jwt.sign({ _id: this._id, level: this.level  }, config.get('PrivateKey'), {expiresIn: '3600s'})
+	const token = jwt.sign({ _id: this._id, level: this.level  }, config.get('PrivateKey'))
 	return token
 }
 

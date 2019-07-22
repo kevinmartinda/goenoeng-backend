@@ -4,6 +4,7 @@ const { userModel, validateUser } = require('../models/users.models')
 const UserDetailModel = require('../models/userDetails.models')
 const Partners = require('../models/partners.models')
 const Joi = require('@hapi/joi')
+const bcrypt = require('bcrypt')
 
 exports.signup = async (req, res, next) => {
   const { error } = validateUser(req.body)
@@ -86,16 +87,30 @@ exports.login = async (req, res) => {
   }
 
   let level = req.params.level
-  if (level == 'user') {
-    res.json({
-      m: level+'a'
-    })
+  let user = await userModel.findOne({ email: req.body.email, level: level })
+  if (!user) {
+    return res.status(400).json({
+      status: 'failed',
+      message: 'User not found.'
+    }); 
+  } 
+  
+  const validPassword = await bcrypt.compare(req.body.password, user.password)
+
+  if(!validPassword) {
+    return res.status(400).json({
+        status: 'failed',
+        message: 'Wrong password.'
+      });
   }
-  else if (level == 'partner') {
-    res.json({
-      m: level+'b'
-    })
-  }
+
+  const token = user.generateAuthToken()
+
+  res.json({
+    status: 'success',
+    data: user,
+    token: token
+  })
 }
 
 function validateLogin(inputLogin) {
