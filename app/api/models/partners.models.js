@@ -13,6 +13,10 @@ const Products = new Schema({
     price: {
         type: Number,
     },
+    stok: {
+        type: Number,
+        default: 0,
+    },
     description: {
         type: String,
     },
@@ -32,6 +36,9 @@ const PartnersSchema = new Schema({
         }
     },
     image_mitra: {
+        type: String
+    },
+    description: {
         type: String
     },
     products: [Products]
