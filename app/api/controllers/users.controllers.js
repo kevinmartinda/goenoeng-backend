@@ -28,6 +28,7 @@ exports.signup = async (req, res, next) => {
       email: req.body.email,
       name: req.body.name,
       address: req.body.address,
+      phone: req.body.phone,
       level: level,
       password: req.body.password,
     })
