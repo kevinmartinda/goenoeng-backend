@@ -26,10 +26,10 @@ const PartnersSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     }],
-    mountain: {
+    mountain: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Mountains'   
-    }
+    }]
 })
 
 const Mitra = mongoose.model('Partner', PartnersSchema)

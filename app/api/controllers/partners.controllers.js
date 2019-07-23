@@ -140,6 +140,58 @@ exports.getAll = async (req, res) => {
 	})
 }
 
+exports.updateProduct = async (req, res) => {
+	let user = req.user
+	if (user.level == 'partner') {
+
+	  let images
+	  if(req.files && req.files.length > 0) {
+        images = await _doMultipleUpload(req)
+    		req.body.images_product = images
+    } 
+
+	  await productssModel.findOneAndUpdate({_id: req.params.id}, req.body )
+	  .then(async data => {
+		  
+		  	await partnersModel.findOne({ partner: req.user._id })
+				.populate({
+					path: 'partner', select: ['_id', 'name', 'email', 'address']
+				})
+				.populate('products')
+				.populate({
+    			path: 'mountain'
+   			}) 
+				.then( dataUpdate => {
+		  		
+	  			res.json({
+						status: 'success',
+						data: dataUpdate
+					})
+		  		
+				})
+				.catch( err => {
+			  	return res.status(500).json({
+		        status: 500,
+		        message: err.message || 'some error'
+		      })
+			  })
+		  
+	  })
+	  .catch( err => {
+	  	return res.status(500).json({
+        status: 500,
+        message: err.message || 'some error'
+      })
+	  })
+	}
+	else {
+		return res.status(400).json({
+      status: 'failed',
+      message: `Access danied`
+    })
+	}
+}
+
 exports.add = async (req, res) => {
 	let user = req.user
 	if (user.level == 'partner') {
@@ -164,7 +216,7 @@ exports.add = async (req, res) => {
 
 	  await productssModel.create({ name_product, price, stok, description, images_product })
 	  .then(async data => {
-		  await partnersModel.update({ partner: req.user._id }, {
+		  await partnersModel.updateOne({ partner: req.user._id }, {
 		  	$push: {
 	        products: data._id
 	    	}
