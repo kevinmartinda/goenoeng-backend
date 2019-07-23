@@ -9,6 +9,8 @@ const auth = require('../app/api/middleware/auth')
 
 router.get('/', partnersController.getAll)
 router.get('/:id', partnersController.getOne)
+
+router.get('/:id/product/:idProduct', partnersController.getOneProduct)
 router.get('/details', auth, partnersController.getFind)
 router.post('/add', auth, multerUploads, partnersController.add)
 

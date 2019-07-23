@@ -76,6 +76,38 @@ exports.getOne = async (req, res) => {
 	})
 }
 
+exports.getOneProduct = async (req, res) => {
+	await partnersModel.findOne({ _id: req.params.id })
+	.populate({           
+	  path: 'partner', select: ['_id', 'name', 'email', 'address'],
+  })
+  .populate({
+  	path: 'products', match: { _id: {$eq: req.params.idProduct}}
+  })
+  .populate({
+  	path: 'mountain'
+  })
+	.then( data => {
+		if(!data){
+			return res.status(400).json({
+				status: 'failed',
+				data: [] 
+			})
+		}
+
+		res.json({
+			status: 'success w',
+			data
+		})
+	})
+	.catch(err => {
+		return res.status(500).json({
+	        status: 500,
+            message: err.message || 'some error'
+	    })
+	})
+}
+
 exports.getAll = async (req, res) => {
 	await partnersModel.find()
 	.populate({
