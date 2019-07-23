@@ -7,6 +7,7 @@ const helmet = require('helmet')
 const { cloudinaryConfig } = require('./config/cloudinary.config')
 
 const mountainsRoute = require('./routes/mountains.route')
+const rentalTransactionRoute = require('./routes/rentalTransaction.route')
 
 const Joi = require('@hapi/joi')
 Joi.objectId = require('joi-objectid')(Joi)
@@ -48,7 +49,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'server running' })
 })
 app.use('/users', usersRoutes)
-
+app.use('/rental-transaction', rentalTransactionRoute)
 app.use('/mountains', mountainsRoute)
 
 const port = process.env.PORT || 3000
