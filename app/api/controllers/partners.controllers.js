@@ -47,6 +47,7 @@ exports.getAll = async (req, res) => {
 	.populate({
 		path: 'partner', select: ['_id', 'name', 'email', 'address']
 	})
+	.populate('products')
 	.then( data => {
 		if (!data) {
 			return res.status(404).json({
