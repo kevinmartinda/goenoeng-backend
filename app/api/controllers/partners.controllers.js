@@ -11,7 +11,7 @@ exports.getFind = async (req, res) => {
 		await partnersModel.findOne({partner: user}).populate({           
 				path: 'partner', select: ['_id', 'name', 'email', 'address']
     })
-		.then(data => {
+		.then( data => {
 			if(!data){
 				return res.status(400).json({
 					status: 'failed',
@@ -37,6 +37,34 @@ exports.getFind = async (req, res) => {
       message: `Access danied`
     })
 	}
+}
+
+exports.getAll = async (req, res) => {
+	await partnersModel.find()
+	.populate({
+		path: 'partner', select: ['_id', 'name', 'email', 'address']
+	})
+	.then( data => {
+		if (!data) {
+			return res.status(404).json({
+				status: 'not found',
+				message: 'empty data',
+				data: {}
+			})
+		}
+
+		res.json({
+			status: 'success',
+			message: 'get data success',
+			data: data
+		})
+	})
+	.catch(err => {
+		return res.status(500).json({
+	    status: 500,
+    	message: err.message || 'some error'
+	  })
+	})
 }
 
 exports.add = async (req, res) => {
