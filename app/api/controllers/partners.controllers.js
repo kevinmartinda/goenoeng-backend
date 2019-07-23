@@ -3,6 +3,7 @@
 const partnersModel = require('../models/partners.models')
 const productssModel = require('../models/products.models')
 const { userModel } = require('../models/users.models')
+const { _doMultipleUpload } = require('../middleware/upload.middleware')
 const Joi = require('@hapi/joi')
 
 exports.getFind = async (req, res) => {
@@ -11,9 +12,12 @@ exports.getFind = async (req, res) => {
 		// get user
 		await partnersModel.findOne({partner: user})
 		.populate({           
-				path: 'partner', select: ['_id', 'name', 'email', 'address']
+		  path: 'partner', select: ['_id', 'name', 'email', 'address']
     })
     .populate('products')
+    .populate({
+    	path: 'mountain'
+    })
 		.then( data => {
 			if(!data){
 				return res.status(400).json({
@@ -42,12 +46,45 @@ exports.getFind = async (req, res) => {
 	}
 }
 
+exports.getOne = async (req, res) => {
+  await partnersModel.findOne({ _id: req.params.id })
+	.populate({           
+	  path: 'partner', select: ['_id', 'name', 'email', 'address']
+  })
+  .populate('products')
+  .populate({
+  	path: 'mountain'
+  })
+	.then( data => {
+		if(!data){
+			return res.status(400).json({
+				status: 'failed',
+				data: [] 
+			})
+		}
+
+		res.json({
+			status: 'success',
+			data
+		})
+	})
+	.catch(err => {
+		return res.status(500).json({
+	        status: 500,
+            message: err.message || 'some error'
+	    })
+	})
+}
+
 exports.getAll = async (req, res) => {
 	await partnersModel.find()
 	.populate({
 		path: 'partner', select: ['_id', 'name', 'email', 'address']
 	})
 	.populate('products')
+	.populate({
+    	path: 'mountain'
+  }) 
 	.then( data => {
 		if (!data) {
 			return res.status(404).json({
@@ -106,6 +143,9 @@ exports.add = async (req, res) => {
 					path: 'partner', select: ['_id', 'name', 'email', 'address']
 				})
 				.populate('products')
+				.populate({
+    			path: 'mountain'
+   			}) 
 				.then( dataAdd => {
 		  		
 	  			res.json({
