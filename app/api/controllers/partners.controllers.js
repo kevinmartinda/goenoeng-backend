@@ -1,6 +1,7 @@
 'use strict'
 
 const partnersModel = require('../models/partners.models')
+const productssModel = require('../models/products.models')
 const { userModel } = require('../models/users.models')
 const Joi = require('@hapi/joi')
 
@@ -8,9 +9,11 @@ exports.getFind = async (req, res) => {
 	let user = req.user
 	if (user.level == 'partner') {
 		// get user
-		await partnersModel.findOne({partner: user}).populate({           
+		await partnersModel.findOne({partner: user})
+		.populate({           
 				path: 'partner', select: ['_id', 'name', 'email', 'address']
     })
+    .populate('products')
 		.then( data => {
 			if(!data){
 				return res.status(400).json({
@@ -88,32 +91,36 @@ exports.add = async (req, res) => {
     req.body.images_product = images
 
 	  const { name_product, price, stok, description, images_product } = req.body
-	  
-	  await partnersModel.update({ partner: req.user._id }, {
-	  	$push: {
-        products: {
-            name_product: name_product,
-            price: price,
-            description: description,
-            stok: stok,
-            images_product: images_product,
-        }
-    	}
-	  })
-	  .then( data => {
-	  	partnersModel.findOne({ partner: req.user._id })
-			.populate({
-				path: 'partner', select: ['_id', 'name', 'email', 'address']
-			})
-			.then( dataAdd => {
-	  		
-  			res.json({
-					status: 'success',
-					data: dataAdd
+
+	  await productssModel.create({ name_product, price, stok, description, images_product })
+	  .then(async data => {
+		  await partnersModel.update({ partner: req.user._id }, {
+		  	$push: {
+	        products: data._id
+	    	}
+		  })
+		  .then( data => {
+		  	partnersModel.findOne({ partner: req.user._id })
+				.populate({
+					path: 'partner', select: ['_id', 'name', 'email', 'address']
 				})
-	  		
-			})
-			.catch( err => {
+				.populate('products')
+				.then( dataAdd => {
+		  		
+	  			res.json({
+						status: 'success',
+						data: dataAdd
+					})
+		  		
+				})
+				.catch( err => {
+			  	return res.status(500).json({
+		        status: 500,
+		        message: err.message || 'some error'
+		      })
+			  })
+		  })
+		  .catch( err => {
 		  	return res.status(500).json({
 	        status: 500,
 	        message: err.message || 'some error'
