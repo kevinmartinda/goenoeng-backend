@@ -13,6 +13,10 @@ Joi.objectId = require('joi-objectid')(Joi)
 
 // routes
 const usersRoutes = require('./routes/users.routes')
+const userDetailsRoutes = require('./routes/userDetails.routes')
+const partnersRoutes = require('./routes/partners.routes')
+
+const { cloudinaryConfig } = require('./config/cloudinary.config')
 
 const app = express()
 
@@ -48,6 +52,8 @@ app.get('/', (req, res) => {
   res.json({ message: 'server running' })
 })
 app.use('/users', usersRoutes)
+app.use('/users', userDetailsRoutes)
+app.use('/partners', partnersRoutes)
 
 app.use('/mountains', mountainsRoute)
 

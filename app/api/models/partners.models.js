@@ -19,7 +19,7 @@ const Products = new Schema({
 })
 
 const PartnersSchema = new Schema({
-    mitra: {
+    partner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
