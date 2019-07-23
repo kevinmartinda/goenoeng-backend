@@ -4,8 +4,6 @@ const logger = require('morgan')
 const bodyParser = require('body-parser')
 const helmet = require('helmet')
 
-const { cloudinaryConfig } = require('./config/cloudinary.config')
-
 const mountainsRoute = require('./routes/mountains.route')
 
 const Joi = require('@hapi/joi')
