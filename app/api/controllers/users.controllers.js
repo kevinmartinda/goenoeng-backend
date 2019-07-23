@@ -28,6 +28,7 @@ exports.signup = async (req, res, next) => {
       email: req.body.email,
       name: req.body.name,
       address: req.body.address,
+      phone: req.body.phone,
       level: level,
       password: req.body.password,
     })
@@ -55,6 +56,7 @@ exports.signup = async (req, res, next) => {
                 longitude: '',
             },
             image_mitra: 'http://pngimages.net/sites/default/files/shop-png-image-54421.png',
+            description: '',
             products: [],
           })
 

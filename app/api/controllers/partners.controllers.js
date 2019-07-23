@@ -1,6 +1,7 @@
 'use strict'
 
 const partnersModel = require('../models/partners.models')
+const productssModel = require('../models/products.models')
 const { userModel } = require('../models/users.models')
 const Joi = require('@hapi/joi')
 
@@ -8,10 +9,12 @@ exports.getFind = async (req, res) => {
 	let user = req.user
 	if (user.level == 'partner') {
 		// get user
-		await partnersModel.findOne({partner: user}).populate({           
+		await partnersModel.findOne({partner: user})
+		.populate({           
 				path: 'partner', select: ['_id', 'name', 'email', 'address']
     })
-		.then(data => {
+    .populate('products')
+		.then( data => {
 			if(!data){
 				return res.status(400).json({
 					status: 'failed',
@@ -39,6 +42,35 @@ exports.getFind = async (req, res) => {
 	}
 }
 
+exports.getAll = async (req, res) => {
+	await partnersModel.find()
+	.populate({
+		path: 'partner', select: ['_id', 'name', 'email', 'address']
+	})
+	.populate('products')
+	.then( data => {
+		if (!data) {
+			return res.status(404).json({
+				status: 'not found',
+				message: 'empty data',
+				data: {}
+			})
+		}
+
+		res.json({
+			status: 'success',
+			message: 'get data success',
+			data: data
+		})
+	})
+	.catch(err => {
+		return res.status(500).json({
+	    status: 500,
+    	message: err.message || 'some error'
+	  })
+	})
+}
+
 exports.add = async (req, res) => {
 	let user = req.user
 	if (user.level == 'partner') {
@@ -50,25 +82,51 @@ exports.add = async (req, res) => {
 	    })
 	  }
 
-	  let partner = new partnersModel({ _id: req.params.id })
-
 	  let images
 	  if(req.files.length > 0) {
         images = await _doMultipleUpload(req)
-        console.log('iyes')
     } else {
         images = ["https://res.cloudinary.com/dvmcph6bx/image/upload/v1563823755/sample.jpg"]
     }
 
     req.body.images_product = images
 
-	  partner.products.push(req.body)
+	  const { name_product, price, stok, description, images_product } = req.body
 
-	  partner.save()
-	  .then( data => {
-	  	res.json({
-	  		data
-	  	})
+	  await productssModel.create({ name_product, price, stok, description, images_product })
+	  .then(async data => {
+		  await partnersModel.update({ partner: req.user._id }, {
+		  	$push: {
+	        products: data._id
+	    	}
+		  })
+		  .then( data => {
+		  	partnersModel.findOne({ partner: req.user._id })
+				.populate({
+					path: 'partner', select: ['_id', 'name', 'email', 'address']
+				})
+				.populate('products')
+				.then( dataAdd => {
+		  		
+	  			res.json({
+						status: 'success',
+						data: dataAdd
+					})
+		  		
+				})
+				.catch( err => {
+			  	return res.status(500).json({
+		        status: 500,
+		        message: err.message || 'some error'
+		      })
+			  })
+		  })
+		  .catch( err => {
+		  	return res.status(500).json({
+	        status: 500,
+	        message: err.message || 'some error'
+	      })
+		  })
 	  })
 	  .catch( err => {
 	  	return res.status(500).json({
@@ -90,6 +148,7 @@ function validateAddProduct(inputProduct) {
       name_product: Joi.string().required(),
       price: Joi.required(),
       description: Joi.string().required(),
+      stok: Joi.number(),
   }
   return Joi.validate(inputProduct, schema)
 }

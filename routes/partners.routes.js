@@ -7,7 +7,8 @@ const { multerUploads } = require('../app/api/middleware/multer.middleware')
 
 const auth = require('../app/api/middleware/auth')
 
+router.get('/', partnersController.getAll)
 router.get('/details', auth, partnersController.getFind)
-router.post('/add/:id', auth, multerUploads, partnersController.add)
+router.post('/add', auth, multerUploads, partnersController.add)
 
 module.exports = router

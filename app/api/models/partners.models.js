@@ -3,21 +3,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const Products = new Schema({
-    name_product: {
-        type: String,
-    },
-    images_product: {
-        type: Array
-    },
-    price: {
-        type: Number,
-    },
-    description: {
-        type: String,
-    },
-})
-
 const PartnersSchema = new Schema({
     partner: {
         type: mongoose.Schema.Types.ObjectId,
@@ -34,7 +19,13 @@ const PartnersSchema = new Schema({
     image_mitra: {
         type: String
     },
-    products: [Products]
+    description: {
+        type: String
+    },
+    products: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
+    }]
 })
 
 const Mitra = mongoose.model('Partner', PartnersSchema)

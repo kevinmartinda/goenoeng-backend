@@ -49,6 +49,27 @@ mongoose.connect(process.env.MONGO_URL, {
 app.get('/', (req, res) => {
   res.json({ message: 'server running' })
 })
+
+app.use((req, res, next) => {
+  const appName = req.header('x-app-name');
+  if (!appName) {
+      return res.status(401).json({
+          status: 'failed',
+          message: 'Access denied. No App Name.'
+      });
+  }
+
+  if ( appName == process.env.APP_NAME ) {
+      next();
+  }
+  else {
+      res.status(400).json({
+          status: 'failed',
+          message: 'Invalid App Name.'
+      });
+  }
+})
+
 app.use('/users', usersRoutes)
 app.use('/users', userDetailsRoutes)
 app.use('/partners', partnersRoutes)
