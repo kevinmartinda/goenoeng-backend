@@ -51,7 +51,9 @@ exports.updateProfile = async (req, res) => {
 	await userDetailModel.findOneAndUpdate({user}, req.body)
 	.then(data => {
 		userDetailModel.findOne({_id: data._id})
-		.populate('user', '-password')
+		.populate({
+			path: 'user', select: ['_id', 'name', 'email', 'address']
+		})
 		.then(dataUpdate => {
 			res.json({
 				status: 'success',

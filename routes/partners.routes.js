@@ -2,12 +2,12 @@
 
 const express = require('express')
 const router = express.Router()
-const userDetailsController = require('../app/api/controllers/userDetails.controllers')
+const partnersController = require('../app/api/controllers/partners.controllers')
 const { multerUploads } = require('../app/api/middleware/multer.middleware')
 
 const auth = require('../app/api/middleware/auth')
 
-router.get('/details', auth, userDetailsController.get)
-router.patch('/details', auth, multerUploads, userDetailsController.updateProfile)
+router.get('/details', auth, partnersController.getFind)
+router.post('/add/:id', auth, multerUploads, partnersController.add)
 
 module.exports = router

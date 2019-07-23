@@ -10,6 +10,7 @@ Joi.objectId = require('joi-objectid')(Joi)
 // routes
 const usersRoutes = require('./routes/users.routes')
 const userDetailsRoutes = require('./routes/userDetails.routes')
+const partnersRoutes = require('./routes/partners.routes')
 
 const { cloudinaryConfig } = require('./config/cloudinary.config')
 
@@ -48,6 +49,7 @@ app.get('/', (req, res) => {
 })
 app.use('/users', usersRoutes)
 app.use('/users', userDetailsRoutes)
+app.use('/partners', partnersRoutes)
 
 const port = process.env.PORT || 3000
 app.listen(port, () => {
