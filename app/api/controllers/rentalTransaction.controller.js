@@ -3,10 +3,9 @@
 const rentalTransactionModel = require('../models/rentalTransaction.model')
 
 exports.findAllUserTransaction = async (req, res) => {
-    console.log(req.params.id)
     await rentalTransactionModel.find({
         user: req.user._id
-    }).populate('product').populate({path:'user', select: ['_id']}).populate('seller')
+    }).populate({path:'user', select: ['_id', 'name']}).populate('product').populate({path: 'seller', select: ['_id', 'name'], populate: {path: 'partner', select: ['_id', 'name']}})
             .then(data => (
                 res.json({
                     status: 200,
@@ -40,7 +39,7 @@ exports.findById = async (req, res) => {
 exports.create = async (req, res) => {
     const { product, totalPrice, seller, totalItem, rentDate, returnDate } = req.body
     const user = req.user._id
-    
+    console.log(req.user)
     if (!user || !product || !totalPrice || !totalItem || !rentDate || !returnDate) {
         return res.status(400).json({
             status: 400,
@@ -49,7 +48,7 @@ exports.create = async (req, res) => {
     }
     await rentalTransactionModel.create({ user, product, totalPrice, seller, totalItem, rentDate, returnDate })
             .then(data => {
-                rentalTransactionModel.findById(data._id).populate({path:'user', select: ['_id']}).populate('products').populate('seller')
+                rentalTransactionModel.findById(data._id).populate({path:'user', select: ['_id', 'name']}).populate('product').populate({path: 'seller', select: ['_id', 'name'], populate: {path: 'partner', select: ['_id', 'name']}})
                     .then(createdData => (
                         res.json({
                             status: 200,
@@ -88,7 +87,13 @@ exports.update = async (req, res) => {
                             status: 200,
                             data: updatedData
                         })
-                    ))
+                    )).catch(err => {
+                        return res.status(500).json({
+                            status: 500,
+                            message: `someting went wrong: ${err.message}`,
+                            data: []
+                        }) 
+                    })
             })
             .catch(err => {
                 if(err.kind === 'ObjectId') {

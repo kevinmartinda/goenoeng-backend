@@ -10,7 +10,7 @@ const UserDetailModel = new mongoose.Schema({
     gender: {
         type: 'String',
     },
-    tanggal_lahir: {
+    birth: {
         type: 'String',
     },
     image_profil: {

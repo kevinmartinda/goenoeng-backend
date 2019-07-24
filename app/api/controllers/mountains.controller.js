@@ -2,6 +2,7 @@
 
 const mountainsModel = require('../models/mountains.model')
 const { _doMultipleUpload } = require('../middleware/upload.middleware')
+const client = require('../middleware/redis.middleware')
 
 exports.findAll = async (req, res) => {
   const search = req.query.search ? req.query.search : ''
@@ -10,43 +11,55 @@ exports.findAll = async (req, res) => {
   const offset = (page - 1) * limit
   let totalRows
 
-  await mountainsModel.countDocuments({
-    name: { $regex: search, $options: 'i' }
-  })
-    .then(data => {
-      totalRows = data
-      return totalRows
-    })
-    .catch(err => {
-      res.status(500).json({
-        status: 500,
-        message: err.message || 'same error'
-      })
-    })
+  const key = `mountain-get-all:${search}:${limit}:${page}:${offset}`
+  console.log(key)
 
-  const totalPage = Math.ceil(parseInt(totalRows) / limit)
+  return client.get(key, async (err, reply) => {
+    if (reply) {
+      return res.json({ source: 'cache', data: JSON.parse(reply) })
+    } else {
+      await mountainsModel.countDocuments({
+        name: { $regex: search, $options: 'i' }
+      })
+        .then(data => {
+          totalRows = data
+          return totalRows
+        })
+        .catch(err => {
+          res.status(500).json({
+            status: 500,
+            message: err.message || 'same error'
+          })
+        })
+    
+      const totalPage = Math.ceil(parseInt(totalRows) / limit)
+    
+      await mountainsModel.find({
+        name: { $regex: search, $options: 'i' }
+      })
+        .limit(limit)
+        .skip(offset)
+        .then(data => {
 
-  await mountainsModel.find({
-    name: { $regex: search, $options: 'i' }
+          client.setex(key, 3600, JSON.stringify(data))
+          
+          res.json({
+            status: 200,
+            totalRows,
+            limit,
+            page,
+            totalPage,
+            data
+          })
+        })
+        .catch(err => (
+          res.status(500).json({
+            status: 500,
+            message: err.message || 'same error'
+          })
+        ))
+    }
   })
-    .limit(limit)
-    .skip(offset)
-    .then(data => {
-      res.json({
-        status: 200,
-        totalRows,
-        limit,
-        page,
-        totalPage,
-        data
-      })
-    })
-    .catch(err => (
-      res.status(500).json({
-        status: 500,
-        message: err.message || 'same error'
-      })
-    ))
 }
 
 exports.findById = async (req, res) => {

@@ -4,16 +4,19 @@ const logger = require('morgan')
 const bodyParser = require('body-parser')
 const helmet = require('helmet')
 
-const { cloudinaryConfig } = require('./config/cloudinary.config')
-
 const mountainsRoute = require('./routes/mountains.route')
 const rentalTransactionRoute = require('./routes/rentalTransaction.route')
+const bookingRoute = require('./routes/booking.route')
 
 const Joi = require('@hapi/joi')
 Joi.objectId = require('joi-objectid')(Joi)
 
 // routes
 const usersRoutes = require('./routes/users.routes')
+const userDetailsRoutes = require('./routes/userDetails.routes')
+const partnersRoutes = require('./routes/partners.routes')
+
+const { cloudinaryConfig } = require('./config/cloudinary.config')
 
 const app = express()
 
@@ -48,9 +51,35 @@ mongoose.connect(process.env.MONGO_URL, {
 app.get('/', (req, res) => {
   res.json({ message: 'server running' })
 })
-app.use('/users', usersRoutes)
+
+app.use((req, res, next) => {
+  const appName = req.header('x-app-name');
+  console.log(appName)
+  if (!appName) {
+      return res.status(401).json({
+          status: 'failed',
+          message: 'Access denied. No App Name.'
+      });
+  }
+
+  if ( appName == process.env.APP_NAME ) {
+      next();
+  }
+  else {
+      res.status(400).json({
+          status: 'failed',
+          message: 'Invalid App Name.'
+      });
+  }
+})
+
 app.use('/rental-transaction', rentalTransactionRoute)
+app.use('/users', usersRoutes)
+app.use('/users', userDetailsRoutes)
+app.use('/partners', partnersRoutes)
+
 app.use('/mountains', mountainsRoute)
+app.use('/booking', bookingRoute)
 
 const port = process.env.PORT || 3000
 app.listen(port, () => {

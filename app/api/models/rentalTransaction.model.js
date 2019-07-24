@@ -8,8 +8,12 @@ const RentalTransactionModel = new mongoose.Schema({
   },
   product: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Products'
+    ref: 'Product'
   }],
+  seller: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Partner'
+  },
   totalItem: {
     type: Number
   },
