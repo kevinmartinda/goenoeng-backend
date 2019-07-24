@@ -145,7 +145,7 @@ exports.update = async (req, res) => {
 
       mountainsModel.findById(data._id)
         .then(updatedData => {
-          client.del(key)
+          deleteKey('mountain-get')
           res.json({
             status: 200,
             data: updatedData
