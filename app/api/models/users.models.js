@@ -66,7 +66,8 @@ function validateUser(user) {
       address: Joi.string().required(),
       level: Joi.string(),
       password: Joi.string().min(6).max(255).required(),
-      password_confirmation: Joi.any().valid(Joi.ref('password')).required().options({ language: { any: { allowOnly: 'must match password' } } })
+      password_confirmation: Joi.any().valid(Joi.ref('password')).required().options({ language: { any: { allowOnly: 'must match password' } } }),
+      mountain: Joi.array()
     }
     return Joi.validate(user, schema)
 }
