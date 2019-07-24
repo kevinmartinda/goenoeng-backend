@@ -2,7 +2,7 @@
 
 const mountainsModel = require('../models/mountains.model')
 const { _doMultipleUpload } = require('../middleware/upload.middleware')
-const client = require('../middleware/redis.middleware')
+const { client, deleteKey } = require('../middleware/redis.middleware')
 
 exports.findAll = async (req, res) => {
   const search = req.query.search ? req.query.search : ''
@@ -11,7 +11,7 @@ exports.findAll = async (req, res) => {
   const offset = (page - 1) * limit
   let totalRows
 
-  const key = `mountain-get-all:${search}:${limit}:${page}:${offset}`
+  const key = `mountain-get:all:${search}:${limit}:${page}:${offset}`
   console.log(key)
 
   return client.get(key, async (err, reply) => {
@@ -63,19 +63,28 @@ exports.findAll = async (req, res) => {
 }
 
 exports.findById = async (req, res) => {
-  await mountainsModel.findById(req.params.id)
-    .then(data => (
-      res.json({
-        status: 200,
-        data
-      })
-    ))
-    .catch(err => (
-      res.status(500).json({
-        status: 500,
-        message: err.message || 'same error'
-      })
-    ))
+  const key = `mountain-get:by:${req.params.id}`
+
+  return client.get(key, async (err, reply) => {
+    if (reply) {
+      return res.json({ source: 'cache', data: JSON.parse(reply) })
+    } else {    
+      await mountainsModel.findById(req.params.id)
+      .then(data => (
+        res.json({
+          status: 200,
+          data
+        })
+      ))
+      .catch(err => (
+        res.status(500).json({
+          status: 500,
+          message: err.message || 'same error'
+        })
+      ))
+    }
+  })
+
 }
 
 exports.create = async (req, res) => {
@@ -100,6 +109,7 @@ exports.create = async (req, res) => {
     .then(data => {
       mountainsModel.findById(data._id)
         .then(createdData => {
+          client.del(key)
           res.json({
             status: 200,
             data: createdData
@@ -135,6 +145,7 @@ exports.update = async (req, res) => {
 
       mountainsModel.findById(data._id)
         .then(updatedData => {
+          client.del(key)
           res.json({
             status: 200,
             data: updatedData

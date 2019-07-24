@@ -4,7 +4,7 @@ const bookingModel = require('../models/booking.model')
 const partnerModel = require('../models/partners.models')
 const mountainModel = require('../models/mountains.model')
 
-const client = require('../middleware/redis.middleware')
+const { client, deleteKey } = require('../middleware/redis.middleware')
 
 exports.findAllUserBooking = async (req, res) => {
     await bookingModel.find({
@@ -49,7 +49,7 @@ exports.create = async (req, res) => {
             .then(async createdData => {
                 await mountainModel.findByIdAndUpdate({_id: mountain}, { $inc: { quota: -totalPerson} })
                     .then(() => {
-                        client.del('mountain-get-all::10:1:0')
+                        deleteKey('mountain-get:')
                     })
                     .catch(err => {
                         console.log(`something went wrong while updating: ${err.message}`)
