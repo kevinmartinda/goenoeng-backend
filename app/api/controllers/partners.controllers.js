@@ -47,6 +47,62 @@ exports.getFind = async (req, res) => {
 	}
 }
 
+exports.updatePartner = async (req, res) => {
+	let user = req.user
+	if (user.level == 'partner') {
+		// get user
+		let images
+	  if(req.files && req.files.length > 0) {
+        images = await _doMultipleUpload(req)
+    		req.body.image_mitra = images
+    }
+
+		await partnersModel.findOneAndUpdate({partner: user._id}, req.body)
+		.then( data => {
+			deleteKey('partner-get')
+			partnersModel.findOne({partner: user._id})
+			.populate({           
+			  path: 'partner', select: ['_id', 'name', 'email', 'address']
+		  })
+		  .populate({
+	  		path: 'products', options: { sort: { 'created_at': -1 } }
+	  	})
+			.then( data => {
+				if(!data){
+					return res.status(400).json({
+						status: 'failed',
+						data: [] 
+					})
+				}
+
+				res.json({
+					status: 'success',
+					data
+				})
+			})
+			.catch(err => {
+				return res.status(500).json({
+			        status: 500,
+		            message: err.message || 'some error'
+			    })
+			})
+			
+		})
+		.catch(err => {
+			return res.status(500).json({
+		        status: 500,
+	            message: err.message || 'some error'
+		    })
+		})
+	}
+	else {
+		return res.status(400).json({
+      status: 'failed',
+      message: `Access danied`
+    })
+	}
+}
+
 exports.getOne = async (req, res) => {
   await partnersModel.findOne({ _id: req.params.id })
 	.populate({           
