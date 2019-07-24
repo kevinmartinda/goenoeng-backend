@@ -107,7 +107,11 @@ exports.create = async (req, res) => {
     })
   }
 
-  await mountainsModel.create({ name, summit, quota, mountainType, address, images, easiestRoute, location: { coordinate:[longitude, latitude] } })
+  await mountainsModel.create({ name, summit, quota, mountainType, address, images, easiestRoute, 
+    location: {
+      type: 'Point',
+      coordinates: [longitude, latitude] 
+    }})
     .then(data => {
       mountainsModel.findById(data._id)
         .then(createdData => {

@@ -59,7 +59,7 @@ exports.create = async (req, res) => {
             .then(async createdData => {
                 await mountainModel.findByIdAndUpdate({_id: mountain}, { $inc: { quota: -totalPerson} })
                     .then(() => {
-                        deleteKey('mountain-get')
+                        deleteKey('booking-get')
                     })
                     .catch(err => {
                         console.log(`something went wrong while updating: ${err.message}`)

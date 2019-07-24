@@ -4,6 +4,7 @@ const partnersModel = require('../models/partners.models')
 const productssModel = require('../models/products.models')
 const { userModel } = require('../models/users.models')
 const { _doMultipleUpload } = require('../middleware/upload.middleware')
+const { client, deleteKey } = require('../middleware/redis.middleware')
 const Joi = require('@hapi/joi')
 
 exports.getFind = async (req, res) => {
@@ -104,61 +105,78 @@ exports.getOneProduct = async (req, res) => {
 }
 
 exports.getroductByMountain = async (req, res) => {
-	await partnersModel.findOne({ 'mountain.0': req.params.id })
-	.populate({           
-	  path: 'partner', select: ['_id', 'name', 'email', 'address'],
-  })
-  .populate({
-  	path: 'products'
-  })
-	.then( data => {
-		if(!data){
-			return res.status(400).json({
-				status: 'failed',
-				data: [] 
-			})
-		}
+	const key = 'get-product-mountain:all'
 
-		res.json({
-			status: 'success w',
-			data
-		})
-	})
-	.catch(err => {
-		return res.status(500).json({
-	        status: 500,
-            message: err.message || 'some error'
-	    })
+	return client.get(key, async (err, reply) => {
+        if (reply) {
+          return res.json({ source: 'cache', status: 200, data: JSON.parse(reply) })
+        } else {		
+			await partnersModel.findOne({ 'mountain.0': req.params.id })
+				.populate({           
+				path: 'partner', select: ['_id', 'name', 'email', 'address'],
+			})
+			.populate({
+				path: 'products'
+			})
+				.then( data => {
+					if(!data){
+						return res.status(400).json({
+							status: 'failed',
+							data: [] 
+						})
+					}
+					client.setex(key, 3600, JSON.stringify(data))
+					res.json({
+						status: 'success w',
+						data
+					})
+				})
+				.catch(err => {
+					return res.status(500).json({
+						status: 500,
+						message: err.message || 'some error'
+					})
+				})
+		}
 	})
 }
 
 exports.getAll = async (req, res) => {
-	await partnersModel.find()
-	.populate({
-		path: 'partner', select: ['_id', 'name', 'email', 'address']
-	})
-	.populate('products')
-	.then( data => {
-		if (!data) {
-			return res.status(404).json({
-				status: 'not found',
-				message: 'empty data',
-				data: {}
+	const key = 'partner-get:all'
+
+    return client.get(key, async (err, reply) => {
+        if (reply) {
+          return res.json({ source: 'cache', status: 200, data: JSON.parse(reply) })
+        } else {
+			await partnersModel.find()
+			.populate({
+				path: 'partner', select: ['_id', 'name', 'email', 'address']
+			})
+			.populate('products')
+			.then( data => {
+				if (!data) {
+					return res.status(404).json({
+						status: 'not found',
+						message: 'empty data',
+						data: {}
+					})
+				}
+				client.setex(key, 3600, JSON.stringify(data))
+				res.json({
+					status: 'success',
+					message: 'get data success',
+					data: data
+				})
+			})
+			.catch(err => {
+				return res.status(500).json({
+				status: 500,
+				message: err.message || 'some error'
+			})
 			})
 		}
-
-		res.json({
-			status: 'success',
-			message: 'get data success',
-			data: data
-		})
 	})
-	.catch(err => {
-		return res.status(500).json({
-	    status: 500,
-    	message: err.message || 'some error'
-	  })
-	})
+	
 }
 
 exports.updateProduct = async (req, res) => {
@@ -180,7 +198,7 @@ exports.updateProduct = async (req, res) => {
 				})
 				.populate('products')
 				.then( dataUpdate => {
-		  		
+				deleteKey('get-product-mountain')
 	  			res.json({
 						status: 'success',
 						data: dataUpdate
@@ -310,7 +328,7 @@ exports.add = async (req, res) => {
 				})
 				.populate('products')
 				.then( dataAdd => {
-		  		
+		  		deleteKey('get-product-mountain')
 	  			res.json({
 						status: 'success',
 						data: dataAdd
