@@ -1,5 +1,9 @@
 const Redis = require('ioredis')
-const client = new Redis(6379)
+const client = new Redis({
+  port: process.env.REDIS_PORT,
+  password: process.env.REDIS_PASSWORD,
+  host: process.env.REDIS_HOST
+})
 
 client.on('error', (err) => {
   console.log("Error " + err)

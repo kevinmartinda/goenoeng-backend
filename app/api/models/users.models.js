@@ -21,8 +21,7 @@ const UserSchema = new Schema({
 		type: String,
 		required: true,
 		minlength: 5,
-    maxlength: 20,
-    unique: true
+    maxlength: 50,
   },
   phone: {
     type: String,
@@ -61,7 +60,7 @@ UserSchema.methods.generateAuthToken = function() {
 function validateUser(user) {
     const schema = {
       email: Joi.string().min(5).max(255).required().email(),
-      name: Joi.string().min(3).max(20).required(),
+      name: Joi.string().min(3).max(50).required(),
       phone: Joi.string().min(10).max(15).required(),
       address: Joi.string().required(),
       level: Joi.string(),
