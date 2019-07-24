@@ -105,10 +105,6 @@ exports.getOneProduct = async (req, res) => {
 
 exports.getroductByMountain = async (req, res) => {
 
-	partnersModel.ensureIndex({
-    location : "2dsphere"
-	});
-
 	let mountain = await mountainsModel.findById(req.params.id)
 	await partnersModel.find({
 		"location" : {
