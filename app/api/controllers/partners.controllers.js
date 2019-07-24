@@ -104,33 +104,37 @@ exports.getOneProduct = async (req, res) => {
 }
 
 exports.getroductByMountain = async (req, res) => {
-	await partnersModel.findOne({ 'mountain.0': req.params.id })
-	.populate({           
-	  path: 'partner', select: ['_id', 'name', 'email', 'address'],
-  })
-  .populate({
-  	path: 'products'
-  })
-	.then( data => {
-		if(!data){
-			return res.status(400).json({
-				status: 'failed',
-				data: [] 
-			})
-		}
 
+	partnersModel.ensureIndex({
+    location : "2dsphere"
+	});
+
+	let mountain = await mountainsModel.findById(req.params.id)
+	await partnersModel.find({
+		"location" : {
+        $geoWithin : {
+            $centerSphere : [ [ mountain.location.coordinates ] , milesToRadian(12) ]
+        }
+    }
+	})
+	.then(data => {
 		res.json({
-			status: 'success w',
 			data
 		})
 	})
 	.catch(err => {
 		return res.status(500).json({
-	        status: 500,
-            message: err.message || 'some error'
-	    })
+			status: 'failed',
+			message: err.message
+		})
 	})
+
 }
+
+var milesToRadian = function(miles){
+  var earthRadiusInMiles = 3959;
+  return miles / earthRadiusInMiles;
+};
 
 exports.getAll = async (req, res) => {
 	await partnersModel.find()

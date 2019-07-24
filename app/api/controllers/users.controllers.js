@@ -57,7 +57,7 @@ exports.signup = async (req, res, next) => {
             partner: dataRegister._id,
             location: {
               type : 'Point',
-              coordinates: [latitude, longitude],
+              coordinates: [longitude, latitude],
             },
             image_mitra: 'http://pngimages.net/sites/default/files/shop-png-image-54421.png',
             description: '',

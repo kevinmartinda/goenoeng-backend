@@ -67,7 +67,8 @@ function validateUser(user) {
       level: Joi.string(),
       password: Joi.string().min(6).max(255).required(),
       password_confirmation: Joi.any().valid(Joi.ref('password')).required().options({ language: { any: { allowOnly: 'must match password' } } }),
-      mountain: Joi.array()
+      latitude: Joi.number(),
+      longitude: Joi.number()
     }
     return Joi.validate(user, schema)
 }
