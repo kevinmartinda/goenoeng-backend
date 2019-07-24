@@ -24,6 +24,9 @@ const MountainModel = new mongoose.Schema({
   images: [{
     type: String
   }],
+  price: {
+    type: Number
+  },
   easiestRoute: {
     type: String
   },

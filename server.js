@@ -5,6 +5,8 @@ const bodyParser = require('body-parser')
 const helmet = require('helmet')
 
 const mountainsRoute = require('./routes/mountains.route')
+const rentalTransactionRoute = require('./routes/rentalTransaction.route')
+const bookingRoute = require('./routes/booking.route')
 
 const Joi = require('@hapi/joi')
 Joi.objectId = require('joi-objectid')(Joi)
@@ -52,6 +54,7 @@ app.get('/', (req, res) => {
 
 app.use((req, res, next) => {
   const appName = req.header('x-app-name');
+  console.log(appName)
   if (!appName) {
       return res.status(401).json({
           status: 'failed',
@@ -70,11 +73,13 @@ app.use((req, res, next) => {
   }
 })
 
+app.use('/rental-transaction', rentalTransactionRoute)
 app.use('/users', usersRoutes)
 app.use('/users', userDetailsRoutes)
 app.use('/partners', partnersRoutes)
 
 app.use('/mountains', mountainsRoute)
+app.use('/booking', bookingRoute)
 
 const port = process.env.PORT || 3000
 app.listen(port, () => {
