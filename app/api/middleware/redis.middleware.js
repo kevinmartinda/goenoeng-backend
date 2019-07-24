@@ -6,8 +6,11 @@ client.on('error', (err) => {
 });
 
 const deleteKey = (key) => {
-  const stream = redis.scanStream({ match: `${key}:*`,count: 100 });
-  const pipeline = redis.pipeline()
+  let count = 100
+  const match = `${key}:*`
+  console.log(match)
+  const stream = client.scanStream({ match, count });
+  const pipeline = client.pipeline()
   const localKeys = [];
 
   stream.on('data', (resultKeys) => {
@@ -20,7 +23,7 @@ const deleteKey = (key) => {
     if (localKeys.length > 100) {
       pipeline.exec(() => { console.log("one batch delete complete") });
       localKeys = [];
-      pipeline = redis.pipeline();
+      pipeline = client.pipeline();
     }
 
   });
