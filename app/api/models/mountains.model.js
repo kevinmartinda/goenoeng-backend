@@ -30,11 +30,16 @@ const MountainModel = new mongoose.Schema({
   easiestRoute: {
     type: String
   },
-  latitude: {
-    type: Number
-  },
-  longitude: {
-    type: Number
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      required: true
+    },
+    coordinates: {
+      type: [Number],
+      required: true
+    }
   }
 }, {
     timestamps: true

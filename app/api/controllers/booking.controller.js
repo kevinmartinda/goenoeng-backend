@@ -1,27 +1,37 @@
 'use strict'
 
 const bookingModel = require('../models/booking.model')
-const partnerModel = require('../models/partners.models')
 const mountainModel = require('../models/mountains.model')
 
 const { client, deleteKey } = require('../middleware/redis.middleware')
 
 exports.findAllUserBooking = async (req, res) => {
-    await bookingModel.find({
-        user: req.user._id
-    }).populate({path:'user', select: ['_id', 'name']}).populate('mountain')
-            .then(data => (
-                res.json({
-                    status: 200,
-                    data
-                })
-            ))
-            .catch(err => {
-                return res.status(500).json({
-                    status: 500,
-                    message: err.message || 'same error'
-                })
-            })
+
+    const key = 'booking-get:all'
+
+    return client.get(key, async (err, reply) => {
+        if (reply) {
+          return res.json({ source: 'cache', status: 200, data: JSON.parse(reply) })
+        } else {
+            await bookingModel.find({
+                user: req.user._id
+            }).populate({path:'user', select: ['_id', 'name']}).populate('mountain')
+                    .then(data => {
+                        client.setex(key, 3600, JSON.stringify(data))
+                        res.json({
+                            status: 200,
+                            data
+                        })
+                    })
+                    .catch(err => {
+                        return res.status(500).json({
+                            status: 500,
+                            message: err.message || 'same error'
+                        })
+                    })
+        
+        }
+    })
 }
 
 exports.create = async (req, res) => {

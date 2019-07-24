@@ -12,11 +12,11 @@ exports.findAll = async (req, res) => {
   let totalRows
 
   const key = `mountain-get:all:${search}:${limit}:${page}:${offset}`
-  console.log(key)
 
   return client.get(key, async (err, reply) => {
+    console.log(reply)
     if (reply) {
-      return res.json({ source: 'cache', data: JSON.parse(reply) })
+      return res.json({ source: 'cache', status: 200, data: JSON.parse(reply) })
     } else {
       await mountainsModel.countDocuments({
         name: { $regex: search, $options: 'i' }
@@ -41,7 +41,8 @@ exports.findAll = async (req, res) => {
         .skip(offset)
         .then(data => {
 
-          client.setex(key, 3600, JSON.stringify(data))
+          const cache = client.setex(key, 3600, JSON.stringify(data))
+          console.log(cache)
           
           res.json({
             status: 200,
@@ -67,15 +68,16 @@ exports.findById = async (req, res) => {
 
   return client.get(key, async (err, reply) => {
     if (reply) {
-      return res.json({ source: 'cache', data: JSON.parse(reply) })
+      return res.json({ source: 'cache', status: 200, data: JSON.parse(reply) })
     } else {    
       await mountainsModel.findById(req.params.id)
-      .then(data => (
+      .then(data => {
+        client.setex(key, 3600, JSON.stringify(data))
         res.json({
           status: 200,
           data
         })
-      ))
+      })
       .catch(err => (
         res.status(500).json({
           status: 500,
@@ -105,11 +107,11 @@ exports.create = async (req, res) => {
     })
   }
 
-  await mountainsModel.create({ name, summit, quota, mountainType, address, images, easiestRoute, latitude, longitude })
+  await mountainsModel.create({ name, summit, quota, mountainType, address, images, easiestRoute, location: { coordinate:[longitude, latitude] } })
     .then(data => {
       mountainsModel.findById(data._id)
         .then(createdData => {
-          client.del(key)
+          deleteKey('mountain-get')
           res.json({
             status: 200,
             data: createdData
@@ -169,7 +171,7 @@ exports.delete = async (req, res) => {
           message: `Mountain not found with id = ${req.params.id}`
         })
       }
-
+      deleteKey('mountain-get')
       res.json({
         status: 200,
         _id: req.params.id
