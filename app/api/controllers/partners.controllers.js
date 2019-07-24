@@ -3,6 +3,7 @@
 const partnersModel = require('../models/partners.models')
 const productssModel = require('../models/products.models')
 const { userModel } = require('../models/users.models')
+const mountainsModel = require('../models/mountains.model')
 const { _doMultipleUpload } = require('../middleware/upload.middleware')
 const { client, deleteKey } = require('../middleware/redis.middleware')
 const Joi = require('@hapi/joi')
@@ -111,35 +112,33 @@ exports.getroductByMountain = async (req, res) => {
         if (reply) {
           return res.json({ source: 'cache', status: 200, data: JSON.parse(reply) })
         } else {		
-			await partnersModel.findOne({ 'mountain.0': req.params.id })
-				.populate({           
-				path: 'partner', select: ['_id', 'name', 'email', 'address'],
-			})
-			.populate({
-				path: 'products'
-			})
-				.then( data => {
-					if(!data){
-						return res.status(400).json({
-							status: 'failed',
-							data: [] 
-						})
+				let mountain = await mountainsModel.findById(req.params.id)
+				await partnersModel.find({
+					"location" : {
+					$geoWithin : {
+						$centerSphere : [ mountain.location.coordinates  , milesToRadian(12) ]
 					}
-					client.setex(key, 3600, JSON.stringify(data))
+				}
+				})
+				.then(data => {
 					res.json({
-						status: 'success w',
 						data
 					})
 				})
 				.catch(err => {
 					return res.status(500).json({
-						status: 500,
-						message: err.message || 'some error'
+						status: 'failed',
+						message: err.message
 					})
 				})
-		}
+			}
 	})
 }
+
+var milesToRadian = function(miles){
+  var earthRadiusInMiles = 3959;
+  return miles / earthRadiusInMiles;
+};
 
 exports.getAll = async (req, res) => {
 	const key = 'partner-get:all'

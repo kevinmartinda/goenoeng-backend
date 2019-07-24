@@ -34,5 +34,13 @@ const PartnersSchema = new Schema({
     timestamps: true
 })
 
+PartnersSchema.index({location: '2dsphere'});
+PartnersSchema.pre('save', function(next) {
+  if (this.isNew && Array.isArray(this.location) && 0 === this.location.length) {
+    this.location = undefined;
+  }
+  next()
+})
+
 const Mitra = mongoose.model('Partner', PartnersSchema)
 module.exports = Mitra

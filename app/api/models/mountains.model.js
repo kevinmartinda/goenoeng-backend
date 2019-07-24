@@ -45,4 +45,12 @@ const MountainModel = new mongoose.Schema({
     timestamps: true
 })
 
+MountainModel.index({location: '2dsphere'});
+MountainModel.pre('save', function(next) {
+  if (this.isNew && Array.isArray(this.location) && 0 === this.location.length) {
+    this.location = undefined;
+  }
+  next()
+})
+
 module.exports = mongoose.model('Mountains', MountainModel)
