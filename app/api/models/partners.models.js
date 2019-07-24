@@ -8,13 +8,17 @@ const PartnersSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
-    coord: {
-        latitude: {
-            type: String
-        },
-        longitude: {
-            type: String
-        }
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        required: true,
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number],
+        required: true
+      }
     },
     image_mitra: {
         type: String
@@ -26,10 +30,6 @@ const PartnersSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     }],
-    mountain: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Mountains'   
-    }]
 }, {
     timestamps: true
 })

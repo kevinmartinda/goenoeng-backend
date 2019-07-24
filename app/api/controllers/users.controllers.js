@@ -49,16 +49,19 @@ exports.signup = async (req, res, next) => {
 
           userDetail.save()
         } else if (dataRegister.level == 'partner') {
+
+          let latitude = (req.body.latitude) ? req.body.latitude : 0
+          let longitude = (req.body.longitude) ? req.body.longitude : 0
+
           const partners = new Partners({
             partner: dataRegister._id,
-            coord: {
-                latitude: '',
-                longitude: '',
+            location: {
+              type : 'Point',
+              coordinates: [latitude, longitude],
             },
             image_mitra: 'http://pngimages.net/sites/default/files/shop-png-image-54421.png',
             description: '',
             products: [],
-            mountain: req.body.mountain,
           })
 
           partners.save()
