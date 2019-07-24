@@ -10,14 +10,14 @@ exports.getFind = async (req, res) => {
 	let user = req.user
 	if (user.level == 'partner') {
 		// get user
-		await partnersModel.findOne({partner: user})
+		await partnersModel.findOne({partner: user._id})
 		.populate({           
 		  path: 'partner', select: ['_id', 'name', 'email', 'address']
-    })
-    .populate('products')
-    .populate({
-    	path: 'mountain'
-    })
+	  })
+	  .populate({
+  		path: 'products', options: { sort: { 'created_at': -1 } }
+  	})
+	  .populate('mountain')
 		.then( data => {
 			if(!data){
 				return res.status(400).json({
@@ -51,7 +51,9 @@ exports.getOne = async (req, res) => {
 	.populate({           
 	  path: 'partner', select: ['_id', 'name', 'email', 'address']
   })
-  .populate('products')
+  .populate({
+  	path: 'products', options: { sort: { 'created_at': -1 } }
+  })
   .populate({
   	path: 'mountain'
   })
@@ -83,6 +85,38 @@ exports.getOneProduct = async (req, res) => {
   })
   .populate({
   	path: 'products', match: { _id: {$eq: req.params.idProduct}}
+  })
+  .populate({
+  	path: 'mountain'
+  })
+	.then( data => {
+		if(!data){
+			return res.status(400).json({
+				status: 'failed',
+				data: [] 
+			})
+		}
+
+		res.json({
+			status: 'success w',
+			data
+		})
+	})
+	.catch(err => {
+		return res.status(500).json({
+	        status: 500,
+            message: err.message || 'some error'
+	    })
+	})
+}
+
+exports.getroductByMountain = async (req, res) => {
+	await partnersModel.findOne({ 'mountain.0': req.params.id })
+	.populate({           
+	  path: 'partner', select: ['_id', 'name', 'email', 'address'],
+  })
+  .populate({
+  	path: 'products'
   })
   .populate({
   	path: 'mountain'
@@ -175,6 +209,73 @@ exports.updateProduct = async (req, res) => {
 		        message: err.message || 'some error'
 		      })
 			  })
+		  
+	  })
+	  .catch( err => {
+	  	return res.status(500).json({
+        status: 500,
+        message: err.message || 'some error'
+      })
+	  })
+	}
+	else {
+		return res.status(400).json({
+      status: 'failed',
+      message: `Access danied`
+    })
+	}
+}
+
+exports.deleteProduct = async (req, res) => {
+	let user = req.user
+	if (user.level == 'partner') {
+
+	  let images
+	  if(req.files && req.files.length > 0) {
+        images = await _doMultipleUpload(req)
+    		req.body.images_product = images
+    } 
+
+	  await productssModel.findOneAndDelete({_id: req.params.id})
+	  .then(async data => {
+	  	  await partnersModel.updateOne({ partner: req.user._id }, {
+		  		$pull: {
+	        	products: req.body.params.id
+	    		}
+		  	})
+		  	.then(async dataHapus => {
+
+			  	await partnersModel.findOne({ partner: req.user._id })
+					.populate({
+						path: 'partner', select: ['_id', 'name', 'email', 'address']
+					})
+					.populate('products')
+					.populate({
+	    			path: 'mountain'
+	   			}) 
+					.then( dataUpdate => {
+			  		
+		  			res.json({
+							status: 'success',
+							data: dataUpdate
+						})
+			  		
+					})
+					.catch( err => {
+				  	return res.status(500).json({
+			        status: 500,
+			        message: err.message || 'some error'
+			      })
+				  })
+
+		  	})
+		  	.catch( err => {
+			  	return res.status(500).json({
+		        status: 500,
+		        message: err.message || 'some error'
+		      })
+			  })
+		  	
 		  
 	  })
 	  .catch( err => {

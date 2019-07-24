@@ -30,6 +30,8 @@ const PartnersSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Mountains'   
     }]
+}, {
+    timestamps: true
 })
 
 const Mitra = mongoose.model('Partner', PartnersSchema)

@@ -33,6 +33,8 @@ const MountainModel = new mongoose.Schema({
   longitude: {
     type: Number
   }
+}, {
+    timestamps: true
 })
 
 module.exports = mongoose.model('Mountains', MountainModel)
