@@ -240,7 +240,7 @@ exports.deleteProduct = async (req, res) => {
 	  .then(async data => {
 	  	  await partnersModel.updateOne({ partner: req.user._id }, {
 		  		$pull: {
-	        	products: req.body.params.id
+	        	products: req.params.id
 	    		}
 		  	})
 		  	.then(async dataHapus => {

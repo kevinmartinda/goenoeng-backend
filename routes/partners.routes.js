@@ -12,11 +12,11 @@ router.get('/partner/:id', partnersController.getOne)
 
 router.get('/mountain/:id', partnersController.getroductByMountain)
 
-router.get('/:id/product/:idProduct', partnersController.getOneProduct)
+router.get('/partner/:id/product/:idProduct', partnersController.getOneProduct)
 
 router.get('/details', auth, partnersController.getFind)
 
-router.post('/add', auth, multerUploads, partnersController.add)
+router.post('/product/add', auth, multerUploads, partnersController.add)
 router.patch('/product/:id', auth, partnersController.updateProduct)
 router.delete('/product/:id', auth, partnersController.deleteProduct)
 
