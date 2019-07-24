@@ -62,7 +62,6 @@ exports.signup = async (req, res, next) => {
             image_mitra: 'http://pngimages.net/sites/default/files/shop-png-image-54421.png',
             description: '',
             products: [],
-            mountain: req.body.mountain,
           })
 
           partners.save()

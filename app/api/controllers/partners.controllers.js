@@ -17,7 +17,6 @@ exports.getFind = async (req, res) => {
 	  .populate({
   		path: 'products', options: { sort: { 'created_at': -1 } }
   	})
-	  .populate('mountain')
 		.then( data => {
 			if(!data){
 				return res.status(400).json({
@@ -54,9 +53,6 @@ exports.getOne = async (req, res) => {
   .populate({
   	path: 'products', options: { sort: { 'created_at': -1 } }
   })
-  .populate({
-  	path: 'mountain'
-  })
 	.then( data => {
 		if(!data){
 			return res.status(400).json({
@@ -85,9 +81,6 @@ exports.getOneProduct = async (req, res) => {
   })
   .populate({
   	path: 'products', match: { _id: {$eq: req.params.idProduct}}
-  })
-  .populate({
-  	path: 'mountain'
   })
 	.then( data => {
 		if(!data){
@@ -118,9 +111,6 @@ exports.getroductByMountain = async (req, res) => {
   .populate({
   	path: 'products'
   })
-  .populate({
-  	path: 'mountain'
-  })
 	.then( data => {
 		if(!data){
 			return res.status(400).json({
@@ -148,9 +138,6 @@ exports.getAll = async (req, res) => {
 		path: 'partner', select: ['_id', 'name', 'email', 'address']
 	})
 	.populate('products')
-	.populate({
-    	path: 'mountain'
-  }) 
 	.then( data => {
 		if (!data) {
 			return res.status(404).json({
@@ -192,9 +179,6 @@ exports.updateProduct = async (req, res) => {
 					path: 'partner', select: ['_id', 'name', 'email', 'address']
 				})
 				.populate('products')
-				.populate({
-    			path: 'mountain'
-   			}) 
 				.then( dataUpdate => {
 		  		
 	  			res.json({
@@ -250,9 +234,6 @@ exports.deleteProduct = async (req, res) => {
 						path: 'partner', select: ['_id', 'name', 'email', 'address']
 					})
 					.populate('products')
-					.populate({
-	    			path: 'mountain'
-	   			}) 
 					.then( dataUpdate => {
 			  		
 		  			res.json({
@@ -328,9 +309,6 @@ exports.add = async (req, res) => {
 					path: 'partner', select: ['_id', 'name', 'email', 'address']
 				})
 				.populate('products')
-				.populate({
-    			path: 'mountain'
-   			}) 
 				.then( dataAdd => {
 		  		
 	  			res.json({
