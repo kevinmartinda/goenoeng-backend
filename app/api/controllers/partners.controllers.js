@@ -39,6 +39,35 @@ exports.getFind = async (req, res) => {
 		    })
 		})
 	}
+	else if (user.level == 'jasa') {
+		// get user
+		await partnersModel.findOne({partner: user._id})
+		.populate({           
+		  path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
+	  })
+	  .populate({
+  		path: 'mountain', options: { sort: { 'created_at': -1 } }
+  	})
+		.then( data => {
+			if(!data){
+				return res.status(400).json({
+					status: 'failed',
+					data: [] 
+				})
+			}
+
+			res.json({
+				status: 'success',
+				data
+			})
+		})
+		.catch(err => {
+			return res.status(500).json({
+		        status: 500,
+	            message: err.message || 'some error'
+		    })
+		})
+	}
 	else {
 		return res.status(400).json({
       status: 'failed',
@@ -81,6 +110,67 @@ exports.updatePartner = async (req, res) => {
 		  })
 		  .populate({
 	  		path: 'products', options: { sort: { 'created_at': -1 } }
+	  	})
+			.then( data => {
+				if(!data){
+					return res.status(400).json({
+						status: 'failed',
+						data: [] 
+					})
+				}
+
+				res.json({
+					status: 'success',
+					data
+				})
+			})
+			.catch(err => {
+				return res.status(500).json({
+			        status: 500,
+		            message: err.message || 'some error'
+			    })
+			})
+			
+		})
+		.catch(err => {
+			return res.status(500).json({
+		        status: 500,
+	            message: err.message || 'some error'
+		    })
+		})
+	}
+	else if (user.level == 'jasa') {
+		// get user
+		let images
+	  if(req.files && req.files.length > 0) {
+        images = await _doMultipleUpload(req)
+    		req.body.image = images
+    }
+
+    let editUser = {}
+    if(req.body.name) {
+    	editUser.name = req.body.name
+    }
+    if(req.body.phone) {
+    	editUser.phone = req.body.phone	
+    }
+    if(req.body.address) {
+    	editUser.address = req.body.address
+    }
+    
+    if(editUser) {
+    	await userModel.findOneAndUpdate({ _id: user._id }, editUser)
+    }
+
+		await partnersModel.findOneAndUpdate({partner: user._id}, req.body)
+		.then( data => {
+			deleteKey('partner-get')
+			partnersModel.findOne({partner: user._id})
+			.populate({           
+			  path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
+		  })
+		  .populate({
+	  		path: 'mountain', options: { sort: { 'created_at': -1 } }
 	  	})
 			.then( data => {
 				if(!data){
@@ -227,6 +317,7 @@ exports.getAll = async (req, res) => {
 				path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
 			})
 			.populate('products')
+			.populate('mountain')
 			.then( data => {
 				if (!data) {
 					return res.status(404).json({

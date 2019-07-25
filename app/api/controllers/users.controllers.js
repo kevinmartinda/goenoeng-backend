@@ -109,7 +109,7 @@ exports.signup = async (req, res, next) => {
           let latitude = (req.body.latitude) ? req.body.latitude : 0
           let longitude = (req.body.longitude) ? req.body.longitude : 0
 
-          await mountainsModel.create({ name:'name', summit:0, quota:0, mountainType:'tidak', address:'none', images:'http://pngimages.net/sites/default/files/shop-png-image-54421.png', easiestRoute:'none', 
+          await mountainsModel.create({ name:'name', summit:0, quota:0, mountainType:'tidak', address:'none', images:'http://pngimages.net/sites/default/files/shop-png-image-54421.png', price:0, easiestRoute:'none', 
           location: {
             type: 'Point',
             coordinates: [0, 0] 
