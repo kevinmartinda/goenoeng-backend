@@ -58,7 +58,6 @@ exports.signup = async (req, res, next) => {
               message: "User added successfully",
               data: dataAs,
               token: token,
-              level: dataAs.user.level
             })
           })
 
@@ -84,12 +83,21 @@ exports.signup = async (req, res, next) => {
             path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
           })
           .then( dataAs => {
+            let dataPartner = {}
+            dataPartner._id = dataAs._id
+            dataPartner.user = dataAs.partner
+            dataPartner.location = dataAs.location
+            dataPartner.products = dataAs.products
+            dataPartner.description = dataAs.description
+            dataPartner.image_mitra = dataAs.image_mitra
+            dataPartner.createdAt = dataAs.createdAt
+            dataPartner.updatedAt = dataAs.updatedAt
+
             res.json({
               status: 'success',
               message: "User added successfully",
-              data: dataAs,
+              data: dataPartner,
               token: token,
-              level: dataAs.partner.level
             })
           })
         }
@@ -151,7 +159,6 @@ exports.login = async (req, res) => {
         message: "User added successfully",
         data: dataAs,
         token: token,
-        level: dataAs.user.level
       })
     })
   }
@@ -160,12 +167,22 @@ exports.login = async (req, res) => {
       path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
     })
     .then( dataAs => {
+
+      let dataPartner = {}
+      dataPartner._id = dataAs._id
+      dataPartner.user = dataAs.partner
+      dataPartner.location = dataAs.location
+      dataPartner.products = dataAs.products
+      dataPartner.description = dataAs.description
+      dataPartner.image_mitra = dataAs.image_mitra
+      dataPartner.createdAt = dataAs.createdAt
+      dataPartner.updatedAt = dataAs.updatedAt
+
       res.json({
         status: 'success',
         message: "User added successfully",
-        data: dataAs,
+        data: dataPartner,
         token: token,
-        level: dataAs.partner.level
       })
     })
   }
@@ -223,7 +240,6 @@ exports.changePassword = async (req, res) => {
                         message: "Cange password successfully",
                         data: dataAs,
                         token: token,
-                        level: dataAs.user.level
                       })
                     })
               }
@@ -232,12 +248,22 @@ exports.changePassword = async (req, res) => {
                   path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
                 })
                 .then( dataAs => {
+
+                  let dataPartner = {}
+                  dataPartner._id = dataAs._id
+                  dataPartner.user = dataAs.partner
+                  dataPartner.location = dataAs.location
+                  dataPartner.products = dataAs.products
+                  dataPartner.description = dataAs.description
+                  dataPartner.image_mitra = dataAs.image_mitra
+                  dataPartner.createdAt = dataAs.createdAt
+                  dataPartner.updatedAt = dataAs.updatedAt
+
                   res.json({
                     status: 'success',
                     message: "Cange password successfully",
-                    data: dataAs,
+                    data: dataPartner,
                     token: token,
-                    level: dataAs.partner.level
                   })
                 })
               }
