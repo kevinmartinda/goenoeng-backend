@@ -30,6 +30,10 @@ const PartnersSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     }],
+    mountain: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Mountains'
+    }
 }, {
     timestamps: true
 })
