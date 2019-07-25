@@ -8,7 +8,7 @@ const { multerUploads } = require('../app/api/middleware/multer.middleware')
 const auth = require('../app/api/middleware/auth')
 
 router.get('/', partnersController.getAll)
-router.patch('/', auth, partnersController.updatePartner)
+router.patch('/', auth, multerUploads, partnersController.updatePartner)
 router.get('/partner/:id', partnersController.getOne)
 
 router.get('/mountain/:id', partnersController.getroductByMountain)

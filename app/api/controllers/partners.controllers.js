@@ -83,7 +83,7 @@ exports.updatePartner = async (req, res) => {
 		let images
 	  if(req.files && req.files.length > 0) {
         images = await _doMultipleUpload(req)
-    		req.body.image = images
+    		req.body.image = images[0]
     }
 
     let editUser = {}
@@ -144,7 +144,7 @@ exports.updatePartner = async (req, res) => {
 		let images
 	  if(req.files && req.files.length > 0) {
         images = await _doMultipleUpload(req)
-    		req.body.image = images
+    		req.body.image = images[0]
     }
 
     let editUser = {}
@@ -396,12 +396,6 @@ exports.updateProduct = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
 	let user = req.user
 	if (user.level == 'partner') {
-
-	  let images
-	  if(req.files && req.files.length > 0) {
-        images = await _doMultipleUpload(req)
-    		req.body.image = images
-    } 
 
 	  await productssModel.findOneAndDelete({_id: req.params.id})
 	  .then(async data => {
