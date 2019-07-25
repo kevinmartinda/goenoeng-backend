@@ -39,6 +39,34 @@ exports.get = async (req, res) => {
 	}
 }
 
+exports.getOne = async (req, res) => {
+	
+		// get user
+		await userDetailModel.findOne({_id: req.params.id}).populate({           
+				path: 'user', select: ['_id', 'name', 'email', 'address', 'phone']
+    })
+		.then(data => {
+			if(!data){
+				return res.status(400).json({
+					status: 'failed',
+					data: [] 
+				})
+			}
+
+			res.json({
+				status: 'success',
+				data
+			})
+		})
+		.catch(err => {
+			return res.status(500).json({
+		        status: 500,
+	            message: err.message || 'some error'
+		    })
+		})
+	
+}
+
 exports.updateProfile = async (req, res) => {
 	let user = req.user
 	if (user.level == 'user') {
