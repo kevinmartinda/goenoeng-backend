@@ -50,14 +50,15 @@ exports.signup = async (req, res, next) => {
           await userDetail.save()
 
           await userDetailModel.findOne({user: dataRegister._id}).populate({           
-            path: 'user', select: ['_id', 'name', 'email', 'address', 'phone']
+            path: 'user', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
           })
           .then( dataAs => {
             res.json({
               status: 'success',
               message: "User added successfully",
               data: dataAs,
-              token: token
+              token: token,
+              level: dataAs.user.level
             })
           })
 
@@ -80,14 +81,15 @@ exports.signup = async (req, res, next) => {
           await partners.save()
 
           await Partners.findOne({partner: dataRegister._id}).populate({           
-            path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
+            path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
           })
           .then( dataAs => {
             res.json({
               status: 'success',
               message: "User added successfully",
               data: dataAs,
-              token: token
+              token: token,
+              level: dataAs.partner.level
             })
           })
         }
@@ -141,27 +143,29 @@ exports.login = async (req, res) => {
 
   if(level == 'user') {
     await userDetailModel.findOne({user: user._id}).populate({           
-      path: 'user', select: ['_id', 'name', 'email', 'address', 'phone']
+      path: 'user', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
     })
     .then( dataAs => {
       res.json({
         status: 'success',
         message: "User added successfully",
         data: dataAs,
-        token: token
+        token: token,
+        level: dataAs.user.level
       })
     })
   }
   else if(level == 'partner') {
     await Partners.findOne({partner: user._id}).populate({           
-      path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
+      path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
     })
     .then( dataAs => {
       res.json({
         status: 'success',
         message: "User added successfully",
         data: dataAs,
-        token: token
+        token: token,
+        level: dataAs.partner.level
       })
     })
   }
@@ -211,27 +215,29 @@ exports.changePassword = async (req, res) => {
               
               if(dataUpdate.level == 'user') {
                     await userDetailModel.findOne({user: dataUpdate._id}).populate({           
-                      path: 'user', select: ['_id', 'name', 'email', 'address', 'phone']
+                      path: 'user', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
                     })
                     .then( dataAs => {
                       res.json({
                         status: 'success',
                         message: "Cange password successfully",
                         data: dataAs,
-                        token: token
+                        token: token,
+                        level: dataAs.user.level
                       })
                     })
               }
               else if (dataUpdate.level == 'partner') {
                 await Partners.findOne({partner: user._id}).populate({           
-                  path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
+                  path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
                 })
                 .then( dataAs => {
                   res.json({
                     status: 'success',
                     message: "Cange password successfully",
                     data: dataAs,
-                    token: token
+                    token: token,
+                    level: dataAs.partner.level
                   })
                 })
               }
