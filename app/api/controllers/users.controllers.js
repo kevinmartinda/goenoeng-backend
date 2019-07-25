@@ -2,6 +2,7 @@
 
 const { userModel, validateUser } = require('../models/users.models')
 const userDetailModel = require('../models/userDetails.models')
+const mountainsModel = require('../models/mountains.model')
 const Partners = require('../models/partners.models')
 const Joi = require('@hapi/joi')
 const bcrypt = require('bcrypt')
@@ -83,7 +84,8 @@ exports.signup = async (req, res, next) => {
             path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
           })
           .populate('products')
-          .then( dataAs => {
+          .then( async dataAs => {
+            
             let dataPartner = {}
             dataPartner._id = dataAs._id
             dataPartner.user = dataAs.partner
@@ -102,6 +104,60 @@ exports.signup = async (req, res, next) => {
             })
           })
         }
+        else if (dataRegister.level == 'jasa') {
+
+          let latitude = (req.body.latitude) ? req.body.latitude : 0
+          let longitude = (req.body.longitude) ? req.body.longitude : 0
+
+          await mountainsModel.create({ name:'name', summit:0, quota:0, mountainType:'tidak', address:'none', images:'http://pngimages.net/sites/default/files/shop-png-image-54421.png', price:0, easiestRoute:'none', 
+          location: {
+            type: 'Point',
+            coordinates: [longitude, latitude] 
+          }})
+          .then(async dataMountain => {
+
+              const partners = new Partners({
+                partner: dataRegister._id,
+                location: {
+                  type : 'Point',
+                  coordinates: [longitude, latitude],
+                },
+                image: 'http://pngimages.net/sites/default/files/shop-png-image-54421.png',
+                description: '',
+                mountain: dataMountain._id,
+              })
+
+              await partners.save()
+
+              await Partners.findOne({partner: dataRegister._id}).populate({           
+                path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
+              })
+              .populate('mountain')
+              .then( dataAs => {
+                
+
+                let dataPartner = {}
+                dataPartner._id = dataAs._id
+                dataPartner.user = dataAs.partner
+                dataPartner.location = dataAs.location
+                dataPartner.mountain = dataAs.mountain
+                dataPartner.description = dataAs.description
+                dataPartner.image = dataAs.image
+                dataPartner.createdAt = dataAs.createdAt
+                dataPartner.updatedAt = dataAs.updatedAt
+
+                res.json({
+                  status: 'success',
+                  message: "User added successfully",
+                  data: dataPartner,
+                  token: token,
+                })
+              })
+          
+          })
+
+        }
+
       })
     })
     .catch( err => {
@@ -188,6 +244,31 @@ exports.login = async (req, res) => {
       })
     })
   }
+  else if(level == 'jasa') {
+    await Partners.findOne({partner: user._id}).populate({           
+      path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
+    })
+    .populate('mountain')
+    .then( dataAs => {
+
+      let dataPartner = {}
+      dataPartner._id = dataAs._id
+      dataPartner.user = dataAs.partner
+      dataPartner.location = dataAs.location
+      dataPartner.mountain = dataAs.mountain
+      dataPartner.description = dataAs.description
+      dataPartner.image = dataAs.image
+      dataPartner.createdAt = dataAs.createdAt
+      dataPartner.updatedAt = dataAs.updatedAt
+
+      res.json({
+        status: 'success',
+        message: "User added successfully",
+        data: dataPartner,
+        token: token,
+      })
+    })
+  }
 }
 
 exports.changePassword = async (req, res) => {
@@ -257,6 +338,31 @@ exports.changePassword = async (req, res) => {
                   dataPartner.user = dataAs.partner
                   dataPartner.location = dataAs.location
                   dataPartner.products = dataAs.products
+                  dataPartner.description = dataAs.description
+                  dataPartner.image = dataAs.image
+                  dataPartner.createdAt = dataAs.createdAt
+                  dataPartner.updatedAt = dataAs.updatedAt
+
+                  res.json({
+                    status: 'success',
+                    message: "Cange password successfully",
+                    data: dataPartner,
+                    token: token,
+                  })
+                })
+              }
+              else if (dataUpdate.level == 'partner') {
+                await Partners.findOne({partner: user._id}).populate({           
+                  path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
+                })
+                .populate('mountain')
+                .then( dataAs => {
+
+                  let dataPartner = {}
+                  dataPartner._id = dataAs._id
+                  dataPartner.user = dataAs.partner
+                  dataPartner.location = dataAs.location
+                  dataPartner.mountain = dataAs.mountain
                   dataPartner.description = dataAs.description
                   dataPartner.image = dataAs.image
                   dataPartner.createdAt = dataAs.createdAt

@@ -33,7 +33,7 @@ const UserSchema = new Schema({
   },
   level: {
     type: String,
-    enum : ['user','partner'],
+    enum : ['user','partner', 'jasa'],
     default: 'user'
   },
 	password: {
