@@ -1,6 +1,7 @@
 'use strict'
 
 const userDetailModel = require('../models/userDetails.models')
+const { userModel } = require('../models/users.models')
 const { _doMultipleUpload } = require('../middleware/upload.middleware')
 
 exports.get = async (req, res) => {
@@ -40,32 +41,55 @@ exports.get = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
 	let user = req.user
-	let images
+	if (user.level == 'user') {
+		let images
 
-	// res.json(req.body);
-	if(req.files && req.files.length > 0) {
-    images = await _doMultipleUpload(req)
-    req.body.image_profil = images[0];
-  }
+		let editUser = {}
+	  if(req.body.name) {
+	  	editUser.name = req.body.name
+	  }
+	  if(req.body.phone) {
+	  	editUser.phone = req.body.phone	
+	  }
+	  if(req.body.address) {
+	  	editUser.address = req.body.address
+	  }
+	  
+	  if(editUser) {
+	  	await userModel.findOneAndUpdate({ _id: user._id }, editUser)
+	  }
 
-	await userDetailModel.findOneAndUpdate({user}, req.body)
-	.then(data => {
-		userDetailModel.findOne({_id: data._id})
-		.populate({
-			path: 'user', select: ['_id', 'name', 'email', 'address']
-		})
-		.then(dataUpdate => {
-			res.json({
-				status: 'success',
-				data: dataUpdate
+		// res.json(req.body);
+		if(req.files && req.files.length > 0) {
+	    images = await _doMultipleUpload(req)
+	    req.body.image_profil = images[0];
+	  }
+
+		await userDetailModel.findOneAndUpdate({user}, req.body)
+		.then(data => {
+			userDetailModel.findOne({_id: data._id})
+			.populate({
+				path: 'user', select: ['_id', 'name', 'email', 'address']
 			})
-		})
+			.then(dataUpdate => {
+				res.json({
+					status: 'success',
+					data: dataUpdate
+				})
+			})
 
-	})
-	.catch(err => {
-		return res.status(500).json({
-	        status: 500,
-            message: err.message || 'some error'
-	    })
-	})
+		})
+		.catch(err => {
+			return res.status(500).json({
+		        status: 500,
+	            message: err.message || 'some error'
+		    })
+		})	
+	}
+	else {
+		return res.status(400).json({
+      status: 'failed',
+      message: `Access danied`
+    })
+	}
 }
