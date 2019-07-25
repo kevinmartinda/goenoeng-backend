@@ -90,7 +90,7 @@ exports.findById = async (req, res) => {
 }
 
 exports.create = async (req, res) => {
-  const { name, summit, quota, mountainType, address, easiestRoute, latitude, longitude } = req.body
+  const { name, summit, quota, level, address, easiestRoute, latitude, longitude, price } = req.body
 
   let images
 
@@ -100,14 +100,14 @@ exports.create = async (req, res) => {
     images = ['https://res.cloudinary.com/sobat-balkon/image/upload/v1562715024/sample.jpg']
   }
 
-  if (!name || !summit || !quota || !mountainType || !address || !easiestRoute || !latitude || !longitude) {
+  if (!name || !summit || !quota || !level || !address || !easiestRoute || !latitude || !longitude || !price) {
     return res.status(400).json({
       status: 400,
-      message: 'name, summit, quota, mountainType, address, easiestRoute, coordinate cannot be null'
+      message: 'name, summit, quota, level, address, easiestRoute, coordinate, price cannot be null'
     })
   }
 
-  await mountainsModel.create({ name, summit, quota, mountainType, address, images, easiestRoute, 
+  await mountainsModel.create({ name, summit, quota, level, address, images, price, easiestRoute, 
     location: {
       type: 'Point',
       coordinates: [longitude, latitude] 

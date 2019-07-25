@@ -327,7 +327,7 @@ exports.deleteProduct = async (req, res) => {
 					})
 					.populate('products')
 					.then( dataUpdate => {
-			  		
+			  		deleteKey('get-product-mountain')
 		  			res.json({
 							status: 'success',
 							data: dataUpdate

@@ -13,9 +13,9 @@ const MountainModel = new mongoose.Schema({
     type: Number,
     required: true
   },
-  mountainType: {
+  level: {
     type: String,
-    enum: ['berapi', 'tidak']
+    enum: ['pemula', 'menengah', 'expert']
   },
   address: {
     type: String,
