@@ -76,6 +76,7 @@ exports.signup = async (req, res, next) => {
             image: 'http://pngimages.net/sites/default/files/shop-png-image-54421.png',
             description: '',
             products: [],
+            role: 'partner'
           })
 
           await partners.save()
@@ -125,6 +126,7 @@ exports.signup = async (req, res, next) => {
                 image: 'http://pngimages.net/sites/default/files/shop-png-image-54421.png',
                 description: '',
                 mountain: dataMountain._id,
+                role: 'jasa'
               })
 
               await partners.save()
