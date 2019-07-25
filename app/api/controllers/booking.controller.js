@@ -1,7 +1,11 @@
 'use strict'
 
+const stripe = require('stripe')(process.env.STRIPE_TEST_KEY)
+
 const bookingModel = require('../models/booking.model')
 const mountainModel = require('../models/mountains.model')
+
+const sendNotification = require('../middleware/sendNotification.lib')
 
 const { client, deleteKey } = require('../middleware/redis.middleware')
 
@@ -35,55 +39,73 @@ exports.findAllUserBooking = async (req, res) => {
 }
 
 exports.create = async (req, res) => {
-    const { mountain, totalPerson, totalPrice, leavingDate, returningDate } = req.body
+    const { mountain, totalPerson, totalPrice, leavingDate, returningDate, ccnumber, month, year, cvc } = req.body
 
     const user = req.user._id
 
-    if (!mountain || !totalPerson || !totalPrice || !leavingDate || !returningDate) {
+    if (!mountain || !totalPerson || !totalPrice || !leavingDate || !returningDate || !ccnumber || !month || !year || !cvc) {
         return res.status(400).json({
             status: 400,
             message: err.message || 'bad request'
         })
     }
 
-    await bookingModel.create({mountain, user, totalPerson, totalPrice, leavingDate, returningDate})
-    .then(data => {
-        if (!data) {
-            return res.status(404).json({
-                status: 404,
-                message: `Transaction not found with id = ${req.params.id}`
-            }) 
+    await stripe.tokens.create({
+        card: {
+          number: ccnumber,
+          exp_month: month,
+          exp_year: year,
+          cvc: cvc
         }
+      })
+      .then(token => {
+        return stripe.charges.create({
+          amount: totalPrice * 100,
+          currency: 'idr',
+          source: token.id
+        });
+      })
+      .then(async result => {
+        await bookingModel.create({mountain, user, totalPerson, totalPrice, leavingDate, returningDate})
+        .then(data => {
+            if (!data) {
+                return res.status(404).json({
+                    status: 404,
+                    message: `Transaction not found with id = ${req.params.id}`
+                }) 
+            }
 
-        bookingModel.findById(data._id).populate({path:'user', select: ['_id', 'name']}).populate('mountain')
-            .then(async createdData => {
-                await mountainModel.findByIdAndUpdate({_id: mountain}, { $inc: { quota: -totalPerson} })
-                    .then(() => {
-                        deleteKey('booking-get')
+            bookingModel.findById(data._id).populate({path:'user', select: ['_id', 'name']}).populate('mountain')
+                .then(async createdData => {
+                    await mountainModel.findByIdAndUpdate({_id: mountain}, { $inc: { quota: -totalPerson} })
+                        .then(() => {
+                            deleteKey('booking-get')
+                        })
+                        .catch(err => {
+                            console.log(`something went wrong while updating: ${err.message}`)
+                        })
+                    
+                    sendNotification(result.receipt_url, req.query.playerId)
+                    res.json({
+                        status: 200,
+                        message: 'transaction success',
+                        data: createdData
                     })
-                    .catch(err => {
-                        console.log(`something went wrong while updating: ${err.message}`)
+                })
+                .catch(err => {
+                    res.status(500).json({
+                        status: 500,
+                        message: `something went wrong: ${err.message}`
                     })
-
-                res.json({
-                    status: 200,
-                    message: 'transaction success',
-                    data: createdData
                 })
-            })
-            .catch(err => {
-                res.status(500).json({
-                    status: 500,
-                    message: `something went wrong: ${err.message}`
-                })
-            })
-    })
-    .catch(err => {
-        return res.status(500).json({
-            status: 500,
-            message: `something went wrong: ${err.message}`,
-            data: []
-        }) 
-    })
+        })
+        .catch(err => {
+            return res.status(500).json({
+                status: 500,
+                message: `something went wrong: ${err.message}`,
+                data: []
+            }) 
+        })
+      })
 }
 
