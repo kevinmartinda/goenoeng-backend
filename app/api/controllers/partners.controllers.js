@@ -14,7 +14,7 @@ exports.getFind = async (req, res) => {
 		// get user
 		await partnersModel.findOne({partner: user._id})
 		.populate({           
-		  path: 'partner', select: ['_id', 'name', 'email', 'address']
+		  path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
 	  })
 	  .populate({
   		path: 'products', options: { sort: { 'created_at': -1 } }
@@ -57,12 +57,27 @@ exports.updatePartner = async (req, res) => {
     		req.body.image_mitra = images
     }
 
+    let editUser = {}
+    if(req.body.name) {
+    	editUser.name = req.body.name
+    }
+    if(req.body.phone) {
+    	editUser.phone = req.body.phone	
+    }
+    if(req.body.address) {
+    	editUser.address = req.body.address
+    }
+    
+    if(editUser) {
+    	await userModel.findOneAndUpdate({ _id: user._id }, editUser)
+    }
+
 		await partnersModel.findOneAndUpdate({partner: user._id}, req.body)
 		.then( data => {
 			deleteKey('partner-get')
 			partnersModel.findOne({partner: user._id})
 			.populate({           
-			  path: 'partner', select: ['_id', 'name', 'email', 'address']
+			  path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
 		  })
 		  .populate({
 	  		path: 'products', options: { sort: { 'created_at': -1 } }
@@ -106,7 +121,7 @@ exports.updatePartner = async (req, res) => {
 exports.getOne = async (req, res) => {
   await partnersModel.findOne({ _id: req.params.id })
 	.populate({           
-	  path: 'partner', select: ['_id', 'name', 'email', 'address']
+	  path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
   })
   .populate({
   	path: 'products', options: { sort: { 'created_at': -1 } }
@@ -135,7 +150,7 @@ exports.getOne = async (req, res) => {
 exports.getOneProduct = async (req, res) => {
 	await partnersModel.findOne({ _id: req.params.id })
 	.populate({           
-	  path: 'partner', select: ['_id', 'name', 'email', 'address'],
+	  path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone'],
   })
   .populate({
   	path: 'products', match: { _id: {$eq: req.params.idProduct}}
@@ -177,7 +192,7 @@ exports.getroductByMountain = async (req, res) => {
 				}
 				})
 				.populate({
-					path: 'partner', select: ['_id', 'name', 'email', 'address']
+					path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
 				})
 				.populate('products')
 				.then(data => {
@@ -209,7 +224,7 @@ exports.getAll = async (req, res) => {
         } else {
 			await partnersModel.find()
 			.populate({
-				path: 'partner', select: ['_id', 'name', 'email', 'address']
+				path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
 			})
 			.populate('products')
 			.then( data => {
@@ -253,7 +268,7 @@ exports.updateProduct = async (req, res) => {
 		  
 		  	await partnersModel.findOne({ partner: req.user._id })
 				.populate({
-					path: 'partner', select: ['_id', 'name', 'email', 'address']
+					path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
 				})
 				.populate('products')
 				.then( dataUpdate => {
@@ -308,7 +323,7 @@ exports.deleteProduct = async (req, res) => {
 
 			  	await partnersModel.findOne({ partner: req.user._id })
 					.populate({
-						path: 'partner', select: ['_id', 'name', 'email', 'address']
+						path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
 					})
 					.populate('products')
 					.then( dataUpdate => {
@@ -383,7 +398,7 @@ exports.add = async (req, res) => {
 		  .then( data => {
 		  	partnersModel.findOne({ partner: req.user._id })
 				.populate({
-					path: 'partner', select: ['_id', 'name', 'email', 'address']
+					path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
 				})
 				.populate('products')
 				.then( dataAdd => {
