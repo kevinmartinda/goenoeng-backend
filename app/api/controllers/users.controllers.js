@@ -36,7 +36,7 @@ exports.signup = async (req, res, next) => {
     await user.save()
     .then( data => {
       userModel.findById(data._id)
-      .then(dataRegister => {
+      .then(async dataRegister => {
         const token = user.generateAuthToken()
 
         if (dataRegister.level == 'user') {
@@ -47,7 +47,20 @@ exports.signup = async (req, res, next) => {
             image_profil: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
           })
 
-          userDetail.save()
+          await userDetail.save()
+
+          await userDetailModel.findOne({user: dataRegister._id}).populate({           
+            path: 'user', select: ['_id', 'name', 'email', 'address', 'phone']
+          })
+          .then( dataAs => {
+            res.json({
+              status: 'success',
+              message: "User added successfully",
+              data: dataAs,
+              token: token
+            })
+          })
+
         } else if (dataRegister.level == 'partner') {
 
           let latitude = (req.body.latitude) ? req.body.latitude : 0
@@ -64,15 +77,20 @@ exports.signup = async (req, res, next) => {
             products: [],
           })
 
-          partners.save()
-        }
+          await partners.save()
 
-        res.json({
-          status: 'success',
-          message: "User added successfully",
-          data: dataRegister,
-          token: token
-        })
+          await Partners.findOne({partner: dataRegister._id}).populate({           
+            path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
+          })
+          .then( dataAs => {
+            res.json({
+              status: 'success',
+              message: "User added successfully",
+              data: dataAs,
+              token: token
+            })
+          })
+        }
       })
     })
     .catch( err => {
@@ -120,11 +138,33 @@ exports.login = async (req, res) => {
 
   const token = user.generateAuthToken()
 
-  res.json({
-    status: 'success',
-    data: user,
-    token: token
-  })
+
+  if(level == 'user') {
+    await userDetailModel.findOne({user: user._id}).populate({           
+      path: 'user', select: ['_id', 'name', 'email', 'address', 'phone']
+    })
+    .then( dataAs => {
+      res.json({
+        status: 'success',
+        message: "User added successfully",
+        data: dataAs,
+        token: token
+      })
+    })
+  }
+  else if(level == 'partner') {
+    await Partners.findOne({partner: user._id}).populate({           
+      path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
+    })
+    .then( dataAs => {
+      res.json({
+        status: 'success',
+        message: "User added successfully",
+        data: dataAs,
+        token: token
+      })
+    })
+  }
 }
 
 exports.changePassword = async (req, res) => {
@@ -164,15 +204,39 @@ exports.changePassword = async (req, res) => {
       req.body.new_password = bcrypt.hashSync(req.body.new_password, saltRounds)
       await userModel.findOneAndUpdate({_id: req.user}, {password: req.body.new_password})
       .then(data=>{
+
           userModel.findOne({_id: req.user})
-          .then(dataUpdate => {
+          .then(async dataUpdate => {
               const token = user.generateAuthToken()
-              res.json({
-                  status: 'success',
-                  data: dataUpdate,
-                  token: token
-              })
+              
+              if(dataUpdate.level == 'user') {
+                    await userDetailModel.findOne({user: dataUpdate._id}).populate({           
+                      path: 'user', select: ['_id', 'name', 'email', 'address', 'phone']
+                    })
+                    .then( dataAs => {
+                      res.json({
+                        status: 'success',
+                        message: "Cange password successfully",
+                        data: dataAs,
+                        token: token
+                      })
+                    })
+              }
+              else if (dataUpdate.level == 'partner') {
+                await Partners.findOne({partner: user._id}).populate({           
+                  path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
+                })
+                .then( dataAs => {
+                  res.json({
+                    status: 'success',
+                    message: "Cange password successfully",
+                    data: dataAs,
+                    token: token
+                  })
+                })
+              }
           })
+      
       })
       .catch(err=>{
           return res.status(500).json({
