@@ -9,7 +9,7 @@ exports.get = async (req, res) => {
 	if (user.level == 'user') {
 		// get user
 		await userDetailModel.findOne({user}).populate({           
-				path: 'user', select: ['_id', 'name', 'email', 'address']
+				path: 'user', select: ['_id', 'name', 'email', 'address', 'phone']
     })
 		.then(data => {
 			if(!data){
@@ -69,7 +69,7 @@ exports.updateProfile = async (req, res) => {
 		.then(data => {
 			userDetailModel.findOne({_id: data._id})
 			.populate({
-				path: 'user', select: ['_id', 'name', 'email', 'address']
+				path: 'user', select: ['_id', 'name', 'email', 'address', 'phone']
 			})
 			.then(dataUpdate => {
 				res.json({
