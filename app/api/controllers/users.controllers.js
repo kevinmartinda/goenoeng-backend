@@ -44,7 +44,7 @@ exports.signup = async (req, res, next) => {
             user: dataRegister._id,
             gender: '',
             tanggal_lahir: '',
-            image_profil: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
+            image: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
           })
 
           await userDetail.save()
@@ -72,7 +72,7 @@ exports.signup = async (req, res, next) => {
               type : 'Point',
               coordinates: [longitude, latitude],
             },
-            image_mitra: 'http://pngimages.net/sites/default/files/shop-png-image-54421.png',
+            image: 'http://pngimages.net/sites/default/files/shop-png-image-54421.png',
             description: '',
             products: [],
           })
@@ -82,6 +82,7 @@ exports.signup = async (req, res, next) => {
           await Partners.findOne({partner: dataRegister._id}).populate({           
             path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
           })
+          .populate('products')
           .then( dataAs => {
             let dataPartner = {}
             dataPartner._id = dataAs._id
@@ -89,7 +90,7 @@ exports.signup = async (req, res, next) => {
             dataPartner.location = dataAs.location
             dataPartner.products = dataAs.products
             dataPartner.description = dataAs.description
-            dataPartner.image_mitra = dataAs.image_mitra
+            dataPartner.image = dataAs.image
             dataPartner.createdAt = dataAs.createdAt
             dataPartner.updatedAt = dataAs.updatedAt
 
@@ -166,6 +167,7 @@ exports.login = async (req, res) => {
     await Partners.findOne({partner: user._id}).populate({           
       path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
     })
+    .populate('products')
     .then( dataAs => {
 
       let dataPartner = {}
@@ -174,7 +176,7 @@ exports.login = async (req, res) => {
       dataPartner.location = dataAs.location
       dataPartner.products = dataAs.products
       dataPartner.description = dataAs.description
-      dataPartner.image_mitra = dataAs.image_mitra
+      dataPartner.image = dataAs.image
       dataPartner.createdAt = dataAs.createdAt
       dataPartner.updatedAt = dataAs.updatedAt
 
@@ -247,6 +249,7 @@ exports.changePassword = async (req, res) => {
                 await Partners.findOne({partner: user._id}).populate({           
                   path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone', 'level']
                 })
+                .populate('products')
                 .then( dataAs => {
 
                   let dataPartner = {}
@@ -255,7 +258,7 @@ exports.changePassword = async (req, res) => {
                   dataPartner.location = dataAs.location
                   dataPartner.products = dataAs.products
                   dataPartner.description = dataAs.description
-                  dataPartner.image_mitra = dataAs.image_mitra
+                  dataPartner.image = dataAs.image
                   dataPartner.createdAt = dataAs.createdAt
                   dataPartner.updatedAt = dataAs.updatedAt
 

@@ -13,7 +13,7 @@ const UserDetailModel = new mongoose.Schema({
     birth: {
         type: 'String',
     },
-    image_profil: {
+    image: {
         type: 'String',
     },
 }, {

@@ -54,7 +54,7 @@ exports.updatePartner = async (req, res) => {
 		let images
 	  if(req.files && req.files.length > 0) {
         images = await _doMultipleUpload(req)
-    		req.body.image_mitra = images
+    		req.body.image = images
     }
 
     let editUser = {}
@@ -260,7 +260,7 @@ exports.updateProduct = async (req, res) => {
 	  let images
 	  if(req.files && req.files.length > 0) {
         images = await _doMultipleUpload(req)
-    		req.body.images_product = images
+    		req.body.image = images
     } 
 
 	  await productssModel.findOneAndUpdate({_id: req.params.id}, req.body )
@@ -309,7 +309,7 @@ exports.deleteProduct = async (req, res) => {
 	  let images
 	  if(req.files && req.files.length > 0) {
         images = await _doMultipleUpload(req)
-    		req.body.images_product = images
+    		req.body.image = images
     } 
 
 	  await productssModel.findOneAndDelete({_id: req.params.id})
@@ -384,11 +384,11 @@ exports.add = async (req, res) => {
         images = ["https://res.cloudinary.com/dvmcph6bx/image/upload/v1563823755/sample.jpg"]
     }
 
-    req.body.images_product = images
+    req.body.image = images
 
-	  const { name_product, price, stok, description, images_product } = req.body
+	  const { name_product, price, stok, description, image } = req.body
 
-	  await productssModel.create({ name_product, price, stok, description, images_product })
+	  await productssModel.create({ name_product, price, stok, description, image })
 	  .then(async data => {
 		  await partnersModel.updateOne({ partner: req.user._id }, {
 		  	$push: {

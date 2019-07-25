@@ -20,7 +20,7 @@ const PartnersSchema = new Schema({
         required: true
       }
     },
-    image_mitra: {
+    image: {
         type: String
     },
     description: {
