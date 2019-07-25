@@ -312,12 +312,12 @@ exports.getAll = async (req, res) => {
         if (reply) {
           return res.json({ source: 'cache', status: 200, data: JSON.parse(reply) })
         } else {
-			await partnersModel.find()
+
+			await partnersModel.find({ role: 'partner' })
 			.populate({
 				path: 'partner', select: ['_id', 'name', 'email', 'address', 'phone']
 			})
 			.populate('products')
-			.populate('mountain')
 			.then( data => {
 				if (!data) {
 					return res.status(404).json({

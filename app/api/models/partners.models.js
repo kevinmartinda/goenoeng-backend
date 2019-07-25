@@ -33,6 +33,11 @@ const PartnersSchema = new Schema({
     mountain: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Mountains'
+    },
+    role: {
+      type: String,
+      enum: ['partner', 'jasa'],
+      default: 'partner'
     }
 }, {
     timestamps: true
