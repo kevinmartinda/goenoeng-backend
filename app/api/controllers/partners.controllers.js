@@ -489,7 +489,7 @@ exports.add = async (req, res) => {
 				})
 				.populate('products')
 				.then( dataAdd => {
-		  		deleteKey('get-product-mountain')
+		  		deleteKey('partner-get')
 	  			res.json({
 						status: 'success',
 						data: dataAdd
