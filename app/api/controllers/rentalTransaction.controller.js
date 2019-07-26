@@ -1,6 +1,8 @@
 'use strict'
 
 const rentalTransactionModel = require('../models/rentalTransaction.model')
+const sendNotification = require('../middleware/sendNotification.lib')
+const stripe = require('stripe')(process.env.STRIPE_TEST_KEY)
 
 exports.findAllUserTransaction = async (req, res) => {
     await rentalTransactionModel.find({
@@ -37,24 +39,41 @@ exports.findById = async (req, res) => {
 }
 
 exports.create = async (req, res) => {
-    const { product, totalPrice, seller, totalItem, rentDate, returnDate } = req.body
+    const { product, totalPrice, totalItem, rentDate, returnDate, ccnumber, year, month, cvc } = req.body
     const user = req.user._id
-    console.log(req.user)
-    if (!user || !product || !totalPrice || !totalItem || !rentDate || !returnDate) {
+    if (!user || !product || !totalPrice || !totalItem || !rentDate || !returnDate || !ccnumber || !year || !month || !cvc) {
         return res.status(400).json({
             status: 400,
             message: 'product, totalPrice, totalItem, rentDate, returnDate is required'
         })
     }
-    await rentalTransactionModel.create({ user, product, totalPrice, seller, totalItem, rentDate, returnDate })
+     await stripe.tokens.create({
+            card: {
+              number: ccnumber,
+              exp_month: month,
+              exp_year: year,
+              cvc: cvc
+            }
+          })
+          .then(token => {
+            return stripe.charges.create({
+              amount: totalPrice * 100,
+              currency: 'idr',
+              source: token.id
+            });
+          })
+          .then(async result => {
+            await rentalTransactionModel.create({ user, product, totalPrice, totalItem, rentDate, returnDate })
             .then(data => {
                 rentalTransactionModel.findById(data._id).populate({path:'user', select: ['_id', 'name']}).populate('product').populate({path: 'seller', select: ['_id', 'name'], populate: {path: 'partner', select: ['_id', 'name']}})
-                    .then(createdData => (
+                    .then(createdData => {
+                        sendNotification(result.receipt_url, req.query.playerId)
                         res.json({
                             status: 200,
+                            payment_token: result.id,
                             data: createdData
                         })
-                    ))
+                    })
                     .catch(err => {
                         res.status(500).json({
                             status: 500,
@@ -68,6 +87,10 @@ exports.create = async (req, res) => {
                     message: err.message || 'same error'
                 })
             })
+          })
+          .catch(err => {
+            res.status(500).json(err);
+          });
 }
 
 exports.update = async (req, res) => {
